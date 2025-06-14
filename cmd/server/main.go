@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net"
 	"net/http"
@@ -101,7 +102,7 @@ func metrics(c *Config, logger *slog.Logger) {
 	function := "metrics"
 	logger = logger.With("function", function)
 
-	m := c.Metrics
+	m := c.Metric
 
 	mux := http.NewServeMux()
 	mux.Handle(m.Path, promhttp.Handler())
@@ -127,6 +128,10 @@ func metrics(c *Config, logger *slog.Logger) {
 
 // run is a function that creates a Prometheus MCP server
 func run(c *Config, logger *slog.Logger) error {
+	function := "run"
+	logger = logger.With("function", function)
+
+	// Create Prometheus API client
 	apiClient, err := api.NewClient(api.Config{
 		Address: c.Prometheus,
 	})
@@ -135,10 +140,13 @@ func run(c *Config, logger *slog.Logger) error {
 		os.Exit(1)
 	}
 
+	// Create
+	// TODO(dazwilkin): Naming?
 	client := NewClient(apiClient, logger)
 
 	serverOpts := []server.ServerOption{
-		server.WithToolCapabilities(false),
+		// server.WithToolCapabilities(true),
+		// server.WithResourceCapabilities(true, true),
 	}
 	logger.Info("ServerOptions", "opts", serverOpts)
 
@@ -232,18 +240,60 @@ func run(c *Config, logger *slog.Logger) error {
 	stdioOpts := []server.StdioOption{}
 	logger.Info("StdioOptions", "opts", stdioOpts)
 
-	return server.ServeStdio(s, stdioOpts...)
+	// Either
+	// Check only --server.addr since --server.path is optional (default: /mcp)
+	if c.Server.Addr == "" {
+		logger.Info("Configuring Server to use stdio",
+			"server.addr", c.Server.Addr,
+			"server.path", c.Server.Path,
+		)
+		return server.ServeStdio(s, stdioOpts...)
+	}
+
+	// Or
+	logger.Info("Configuring Server to use HTTP streaming",
+		"server.addr", c.Server.Addr,
+		"server.path", c.Server.Path,
+	)
+	streamOpts := []server.StreamableHTTPOption{
+		server.WithEndpointPath(c.Server.Path), // Default endpoint path
+		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
+			logger := logger.With("function", "WithHttpContextFunc")
+			logger.Info("Entered")
+			defer logger.Info("Exited")
+
+			// Does nothing
+			return ctx
+		}),
+		server.WithStateLess(true),
+	}
+	return server.NewStreamableHTTPServer(s, streamOpts...).Start(c.Server.Addr)
 }
 
 func main() {
 	logger := getLogger()
-	config := NewConfig()
 
-	// Start Prometheus metrics exporter in Go routine
-	go metrics(config, logger)
+	config, err := NewConfig(logger)
+	if err != nil {
+		msg := "unable to create new config"
+		logger.Error(msg, "err", err)
+		os.Exit(1)
+	}
+
+	// If configured, start Prometheus metrics exporter in Go routine
+	// Check only --metric.addr since --metric.path is optional (default: /metrics)
+	if config.Metric.Addr != "" {
+		logger.Info("Starting Prometheus metrics exporter",
+			"metric.addr", config.Metric.Addr,
+			"metric.path", config.Metric.Path,
+		)
+		go metrics(config, logger)
+	}
 
 	// Create|Start MCP server
+	logger.Info("Starting Prometheus MCP server")
 	if err := run(config, logger); err != nil {
-		logger.Error("unable to server", "err", err)
+		msg := "unable to server"
+		logger.Error(msg, "err", err)
 	}
 }
