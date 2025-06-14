@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
 	"github.com/prometheus/client_golang/api"
@@ -131,111 +130,41 @@ func run(c *Config, logger *slog.Logger) error {
 	function := "run"
 	logger = logger.With("function", function)
 
-	// Create Prometheus API client
-	apiClient, err := api.NewClient(api.Config{
-		Address: c.Prometheus,
-	})
-	if err != nil {
-		logger.Error("unable to create Prometheus API client", "err", err)
-		os.Exit(1)
-	}
-
-	// Create
-	// TODO(dazwilkin): Naming?
-	client := NewClient(apiClient, logger)
-
 	serverOpts := []server.ServerOption{
 		// server.WithToolCapabilities(true),
 		// server.WithResourceCapabilities(true, true),
 	}
 	logger.Info("ServerOptions", "opts", serverOpts)
-
 	s := server.NewMCPServer(
-		"Prometheus",
+		"PrometheusMCP",
 		"0.0.1",
 		serverOpts...,
 	)
 
-	tools := []server.ServerTool{
-		{
-			Tool: mcp.NewTool(
-				"alerts",
-				mcp.WithDescription("Prometheus Alerts"),
-			),
-			Handler: client.Alerts,
-		},
-		{
-			Tool: mcp.NewTool(
-				"metrics",
-				mcp.WithDescription("Prometheus Metrics"),
-			),
-			Handler: client.Metrics,
-		},
-		{
-			Tool: mcp.NewTool(
-				"query",
-				mcp.WithDescription("Prometheus Query"),
-				mcp.WithString("query",
-					mcp.Required(),
-					mcp.Description("Prometheus expression query string"),
-				),
-				mcp.WithString("time",
-					mcp.Description("Evaluation timestamp (RFC-3339 or Unix)"),
-				),
-				mcp.WithString("timeout",
-					mcp.Description("Evaluation timeout"),
-				),
-				mcp.WithNumber("limit",
-					mcp.Description("Maximum number of returned series"),
-				),
-			),
-			Handler: client.Query,
-		},
-		{
-			Tool: mcp.NewTool(
-				"query_range",
-				mcp.WithDescription("Prometheus Query Range"),
-				mcp.WithString("query",
-					mcp.Required(),
-					mcp.Description("Prometheus expression query string"),
-				),
-				mcp.WithString("start",
-					mcp.Required(),
-					mcp.Description("Start timestamp (RFC-3339 or Unix)"),
-				),
-				mcp.WithString("end",
-					mcp.Required(),
-					mcp.Description("End timestamp (RFC-3339 or Unix)"),
-				),
-				mcp.WithString("step",
-					mcp.Required(),
-					mcp.Description("Query resolution step width in duration format"),
-				),
-				mcp.WithString("timeout",
-					mcp.Description("Evaluation timeout"),
-				),
-				mcp.WithNumber("limit",
-					mcp.Description("Maximum number of returned series"),
-				),
-			),
-			Handler: client.QueryRange,
-		},
-		{
-			Tool: mcp.NewTool("rules",
-				mcp.WithDescription("Prometheus Rules"),
-			),
-			Handler: client.Rules,
-		},
-		{
-			Tool: mcp.NewTool(
-				"targets",
-				mcp.WithDescription("Prometheus Targets"),
-			),
-			Handler: client.Targets,
-		},
+	// Create Prometheus Client proxy
+	// TODO(dazwilkin): Naming?
+	// TODO(dazwilkin): {} suggests refactoring to a function
+	{
+		// Create Prometheus API client
+		apiClient, err := api.NewClient(api.Config{
+			Address: c.Prometheus,
+		})
+		if err != nil {
+			logger.Error("unable to create Prometheus API client", "err", err)
+			os.Exit(1)
+		}
+
+		client := NewClient(apiClient, logger)
+		s.AddTools(client.Tools()...)
 	}
 
-	s.AddTools(tools...)
+	// Create Prometheus Meta proxy
+	// TODO(dazwilkin): Naming?
+	// TODO(dazwilkin): {} suggests refactoring to a function
+	{
+		meta := NewMeta(c.Prometheus, logger)
+		s.AddTools(meta.Tools()...)
+	}
 
 	stdioOpts := []server.StdioOption{}
 	logger.Info("StdioOptions", "opts", stdioOpts)

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,13 +29,147 @@ func NewClient(apiClient api.Client, logger *slog.Logger) *Client {
 	}
 }
 
+// Tools is a method that creates a slice of MCP server tools
+// For every tool defined in this method, there should be a handler method
+func (x *Client) Tools() []server.ServerTool {
+	method := "tools"
+	logger := x.logger.With("method", method)
+	logger.Info("Entered")
+	defer logger.Info("Exited")
+
+	tools := []server.ServerTool{
+		{
+			Tool: mcp.NewTool(
+				"alertmanagers",
+				mcp.WithDescription("Prometheus Alertmanagers"),
+			),
+			Handler: x.Alertmanagers,
+		},
+		{
+			Tool: mcp.NewTool(
+				"alerts",
+				mcp.WithDescription("Prometheus Alerts"),
+			),
+			Handler: x.Alerts,
+		},
+		{
+			Tool: mcp.NewTool(
+				"metrics",
+				mcp.WithDescription("Prometheus Metrics"),
+			),
+			Handler: x.Metrics,
+		},
+		{
+			Tool: mcp.NewTool(
+				"query",
+				mcp.WithDescription("Prometheus Query"),
+				mcp.WithString("query",
+					mcp.Required(),
+					mcp.Description("Prometheus expression query string"),
+				),
+				mcp.WithString("time",
+					mcp.Description("Evaluation timestamp (RFC-3339 or Unix)"),
+				),
+				mcp.WithString("timeout",
+					mcp.Description("Evaluation timeout"),
+				),
+				mcp.WithNumber("limit",
+					mcp.Description("Maximum number of returned series"),
+				),
+			),
+			Handler: x.Query,
+		},
+		{
+			Tool: mcp.NewTool(
+				"query_range",
+				mcp.WithDescription("Prometheus Query Range"),
+				mcp.WithString("query",
+					mcp.Required(),
+					mcp.Description("Prometheus expression query string"),
+				),
+				mcp.WithString("start",
+					mcp.Required(),
+					mcp.Description("Start timestamp (RFC-3339 or Unix)"),
+				),
+				mcp.WithString("end",
+					mcp.Required(),
+					mcp.Description("End timestamp (RFC-3339 or Unix)"),
+				),
+				mcp.WithString("step",
+					mcp.Required(),
+					mcp.Description("Query resolution step width in duration format"),
+				),
+				mcp.WithString("timeout",
+					mcp.Description("Evaluation timeout"),
+				),
+				mcp.WithNumber("limit",
+					mcp.Description("Maximum number of returned series"),
+				),
+			),
+			Handler: x.QueryRange,
+		},
+		{
+			Tool: mcp.NewTool("rules",
+				mcp.WithDescription("Prometheus Rules"),
+			),
+			Handler: x.Rules,
+		},
+		{
+			Tool: mcp.NewTool(
+				"status_tsdb",
+				mcp.WithDescription("Prometheus Status: TSDB"),
+			),
+			Handler: x.StatusTSDB,
+		},
+		{
+			Tool: mcp.NewTool(
+				"targets",
+				mcp.WithDescription("Prometheus Targets"),
+			),
+			Handler: x.Targets,
+		},
+	}
+	return tools
+}
+
 // Err is a function that combines logging, metrics and returning errors
 func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *ErrClient) {
 	logger.Error(msg, "err", err)
+
+	// Increment Prometheus error metric
 	errorx.With(prometheus.Labels{
 		"method": method,
 	}).Inc()
+
 	return mcp.NewToolResultError(msg), NewErrClient(msg, err)
+}
+
+// Alertmanagers is a method that queries Prometheus for a list of Alertmanagers
+func (x *Client) Alertmanagers(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	method := "Alertmanagers"
+	logger := x.logger.With("method", method)
+	logger.Info("Entered")
+	defer logger.Info("Exited")
+
+	// Increment Prometheus total metric
+	totalx.With(prometheus.Labels{
+		"method": method,
+	}).Inc()
+
+	// Invoke Prometheus Alertmanagers method
+	alertmanagers, err := x.v1api.AlertManagers(ctx)
+	if err != nil {
+		msg := "unable to retrieve alertmanagers"
+		return Err(method, msg, err, logger)
+	}
+
+	b, err := json.Marshal(alertmanagers)
+	if err != nil {
+		msg := "unable to marshal alertmanagers"
+		return Err(method, msg, err, logger)
+	}
+
+	return mcp.NewToolResultText(string(b)), nil
 }
 
 // Alerts ia a method that queries Prometheus for a list of Alerts
@@ -44,8 +179,6 @@ func (x *Client) Alerts(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 	logger.Info("Entered")
 	defer logger.Info("Exited")
 
-	// Increment Prometheus total metric
-	// Increment Prometheus total metric
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
 		"method": method,
@@ -247,6 +380,34 @@ func (x *Client) Rules(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 	return mcp.NewToolResultText(string(b)), nil
 }
 
+// StatusTSDB is a method that queries Prometheus for the status of its time-series database
+func (x *Client) StatusTSDB(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	method := "StatusTSDB"
+	logger := x.logger.With("method", method)
+	logger.Info("Entered")
+	defer logger.Info("Exited")
+
+	// Increment Prometheus total metric
+	totalx.With(prometheus.Labels{
+		"method": method,
+	}).Inc()
+
+	// Invoke Prometheus Status TSDB method
+	tsdb, err := x.v1api.TSDB(ctx)
+	if err != nil {
+		msg := "unable to retrieve TSDB status"
+		return Err(method, msg, err, logger)
+	}
+
+	b, err := json.Marshal(tsdb)
+	if err != nil {
+		msg := "unable to marshal TSDB status"
+		return Err(method, msg, err, logger)
+	}
+
+	return mcp.NewToolResultText(string(b)), nil
+}
+
 // Targets is a method that queries Prometheus for a list of Targets
 func (x *Client) Targets(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Targets"
@@ -262,6 +423,7 @@ func (x *Client) Targets(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 	// Invoke Prometheus Targets method
 	targets, err := x.v1api.Targets(ctx)
 	if err != nil {
+		msg := "unable to retrieve targets"
 		return Err(method, msg, err, logger)
 	}
 
