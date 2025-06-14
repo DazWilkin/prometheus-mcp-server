@@ -1,5 +1,8 @@
 # Prometheus MCP Server
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/DazWilkin/prometheus-mcp-server)](https://goreportcard.com/report/github.com/DazWilkin/prometheus-mcp-server)
+[![Go Reference](https://pkg.go.dev/badge/github.com/DazWilkin/prometheus-mcp-server.svg)](https://pkg.go.dev/github.com/DazWilkin/prometheus-mcp-server)
+
 An MCP server for [Prometheus](https://prometheus.io)
 
 Very much a work in progress: **not tested** in a MCP client host
