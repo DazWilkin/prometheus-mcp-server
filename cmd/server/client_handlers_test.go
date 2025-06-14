@@ -19,6 +19,10 @@ import (
 	"github.com/prometheus/client_golang/api"
 )
 
+func TestAlertmanagers(t *testing.T) {
+	t.Skip("Test not implemented")
+}
+
 // TestAlerts tests Alerts
 // https://prometheus.io/docs/prometheus/latest/querying/api/#alerts
 func TestAlerts(t *testing.T) {
@@ -31,9 +35,6 @@ func TestAlerts(t *testing.T) {
 	want := string(testdata.JsonAlertsResult)
 
 	mux.HandleFunc("/api/v1/alerts", func(w http.ResponseWriter, r *http.Request) {
-		logger := logger.With("handler", "alerts")
-		logger.Info("Entered")
-		defer logger.Info("Exited")
 
 		data := want
 		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
@@ -42,7 +43,7 @@ func TestAlerts(t *testing.T) {
 		// if err := json.NewEncoder(w).Encode(s); err != nil {
 		if _, err := w.Write([]byte(resp)); err != nil {
 			msg := "error encoding JSON"
-			logger.Error(msg, "err", err)
+			t.Logf("%s: %+q", msg, err)
 			http.Error(w, msg, http.StatusInternalServerError)
 		}
 	})
@@ -72,7 +73,7 @@ func TestAlerts(t *testing.T) {
 		t.Errorf("unable to invoke Alerts method")
 	}
 
-	logger.Info("Response", "resp", resp)
+	t.Logf("Response: %+v", resp)
 
 	if len(resp.Content) == 0 {
 		t.Errorf("expected content")
@@ -102,9 +103,6 @@ func TestMetrics(t *testing.T) {
 	want := string(testdata.JsonLabelValues)
 
 	mux.HandleFunc("/api/v1/label/__name__/values", func(w http.ResponseWriter, r *http.Request) {
-		logger := logger.With("handler", "metrics")
-		logger.Info("Entered")
-		defer logger.Info("Exited")
 
 		data := want
 		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
@@ -112,7 +110,7 @@ func TestMetrics(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		if _, err := w.Write([]byte(resp)); err != nil {
 			msg := "error encoding JSON"
-			logger.Error(msg, "err", err)
+			t.Logf("%s: %+q", msg, err)
 			http.Error(w, msg, http.StatusInternalServerError)
 		}
 	})
@@ -142,7 +140,7 @@ func TestMetrics(t *testing.T) {
 		t.Errorf("unable to invoke Metrics method")
 	}
 
-	logger.Info("Response", "resp", resp)
+	t.Logf("Response: %+v", resp)
 
 	if len(resp.Content) == 0 {
 		t.Errorf("expected content")
@@ -172,25 +170,21 @@ func TestQuery(t *testing.T) {
 	// However, it's not value of "data" returned by the handler
 	// See the handler's response construction for more
 	want := string(testdata.JsonModelVector)
-	logger.Info("Output", "want", want)
+	t.Logf("Want: %s", want)
 
 	mux.HandleFunc("/api/v1/query", func(w http.ResponseWriter, r *http.Request) {
-		logger := logger.With("handler", "query")
-		logger.Info("Entered")
-		defer logger.Info("Exited")
-
 		// JSON-RPC method arguments are the request body
 		// Example "query=up%7Bjob%3D%22prometheus%22%7D&time=1749772800"
 		b, err := io.ReadAll(r.Body)
 		if err != nil {
 			msg := "error reading request body"
-			logger.Error(msg, "err", err)
+			t.Logf("%s: %+q", msg, err)
 			http.Error(w, msg, http.StatusInternalServerError)
 		}
 		defer func() {
 			if err := r.Body.Close(); err != nil {
 				msg := "unable to close request body"
-				logger.Error(msg, "err", err)
+				t.Logf("%s: %+q", msg, err)
 				http.Error(w, msg, http.StatusInternalServerError)
 			}
 		}()
@@ -200,17 +194,17 @@ func TestQuery(t *testing.T) {
 		var values url.Values
 		if values, err = url.ParseQuery(querystring); err != nil {
 			msg := "unable to parse query string from body"
-			logger.Error(msg, "err", err)
+			t.Logf("%s: %+q", msg, err)
 			http.Error(w, msg, http.StatusInternalServerError)
 		}
 
-		logger.Info("Values", "values", values)
+		t.Logf("Values: %+v", values)
 
 		// Retrieve parameters from the decoded map
 		query := values.Get("query")
 		ts := values.Get("time")
 
-		logger.Info("Arguments", "query", query, "time", ts)
+		t.Logf("Arguments: {query: %s, time: %s}", query, ts)
 
 		// Construction of this handler's response differs to the other tests
 		// In the other tests "data" is the value of "want"
@@ -224,20 +218,20 @@ func TestQuery(t *testing.T) {
 		// To be JSON marshaled into the correct value by this handler
 		data := testdata.JsonModelValue
 		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
-		logger.Info("response", "JSON", string(resp))
+		t.Logf("Response: %s", string(resp))
 
 		w.Header().Set("Content-Type", "application/json")
 		if _, err := w.Write([]byte(resp)); err != nil {
 			msg := "error encoding JSON"
-			logger.Error(msg, "err", err)
+			t.Logf("%s: %+q", msg, err)
 			http.Error(w, msg, http.StatusInternalServerError)
 		}
 	})
 
-	mockPrometheus := server.URL
+	address := server.URL
 
 	apiClient, err := api.NewClient(api.Config{
-		Address: mockPrometheus,
+		Address: address,
 	})
 	if err != nil {
 		t.Errorf("unable to create Prometheus API client")
@@ -264,7 +258,7 @@ func TestQuery(t *testing.T) {
 		t.Errorf("unable to invoke Query method")
 	}
 
-	logger.Info("Response", "resp", resp)
+	t.Logf("Response: %+v", resp)
 
 	if len(resp.Content) == 0 {
 		t.Errorf("expected content")
@@ -279,4 +273,16 @@ func TestQuery(t *testing.T) {
 	if got != want {
 		t.Errorf("got:\n%s\nwant:\n%s", got, want)
 	}
+}
+
+func TestQueryRange(t *testing.T) {
+	t.Skip("Test not implemented")
+}
+
+func TestRules(t *testing.T) {
+	t.Skip("Test not implemented")
+}
+
+func TestTargets(t *testing.T) {
+	t.Skip("Test not implemented")
 }
