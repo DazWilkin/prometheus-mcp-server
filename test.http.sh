@@ -14,6 +14,16 @@ source .env.test
     http://${SERVER_ADDR}/${SERVER_PATH}
 )
 
+# `tools/call` (Alertmanagers)
+(
+    JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"alertmanagers","arguments":{}}}'
+    curl \
+    --request POST \
+    --header "Content-Type: application/json" \
+    --data "${JSON}" \
+    http://${SERVER_ADDR}/${SERVER_PATH}
+)
+
 # `tools/call` (Alerts)
 (
     JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"alerts","arguments":{}}}'
@@ -33,6 +43,17 @@ source .env.test
     --data "${JSON}" \
     http://${SERVER_ADDR}/${SERVER_PATH}
 )
+
+# `tools/call` (Ping)
+(
+    JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"ping","arguments":{}}}'
+    curl \
+    --request POST \
+    --header "Content-Type: application/json" \
+    --data "${JSON}" \
+    http://${SERVER_ADDR}/${SERVER_PATH}
+)
+
 
 # `tools/call` (Query: instant)
 # TODO(dazwilkin) Add "time" (and optional "timeout","limit")
@@ -67,6 +88,17 @@ source .env.test
     --data "${JSON}" \
     http://${SERVER_ADDR}/${SERVER_PATH}
 )
+
+# `tools/call` (Status TSDB)
+(
+    JSON='{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"status_tsdb","arguments":{}}}'
+    curl \
+    --request POST \
+    --header "Content-Type: application/json" \
+    --data "${JSON}" \
+    http://${SERVER_ADDR}/${SERVER_PATH}
+)
+
 
 # `tools/call` (Targets)
 (

@@ -14,6 +14,17 @@ source .env.test
     | jq -r .
 )
 
+# `tools/call` (Alertmanagers)
+(
+    JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"alertmanagers","arguments":{}}}'
+    echo ${JSON} \
+    | go run ./cmd/server \
+      --metric.addr="" \
+      --server.addr="" \
+    | jq -r .    
+
+)
+
 # `tools/call` (Alerts)
 (
     JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"alerts","arguments":{}}}'
