@@ -35,11 +35,12 @@ func TestAlerts(t *testing.T) {
 		logger.Info("Entered")
 		defer logger.Info("Exited")
 
-		s := fmt.Sprintf(`{"data":%s,"status":"success"}`, want)
+		data := want
+		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
 
 		w.Header().Set("Content-Type", "application/json")
 		// if err := json.NewEncoder(w).Encode(s); err != nil {
-		if _, err := w.Write([]byte(s)); err != nil {
+		if _, err := w.Write([]byte(resp)); err != nil {
 			msg := "error encoding JSON"
 			logger.Error(msg, "err", err)
 			http.Error(w, msg, http.StatusInternalServerError)
@@ -66,7 +67,7 @@ func TestAlerts(t *testing.T) {
 			Arguments: map[string]any{},
 		},
 	}
-	resp, err := c.Alerts(context.TODO(), rqst)
+	resp, err := c.Alerts(context.Background(), rqst)
 	if err != nil {
 		t.Errorf("unable to invoke Alerts method")
 	}
@@ -105,10 +106,11 @@ func TestMetrics(t *testing.T) {
 		logger.Info("Entered")
 		defer logger.Info("Exited")
 
-		s := fmt.Sprintf(`{"data":%s,"status":"success"}`, want)
+		data := want
+		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
 
 		w.Header().Set("Content-Type", "application/json")
-		if _, err := w.Write([]byte(s)); err != nil {
+		if _, err := w.Write([]byte(resp)); err != nil {
 			msg := "error encoding JSON"
 			logger.Error(msg, "err", err)
 			http.Error(w, msg, http.StatusInternalServerError)
@@ -135,7 +137,7 @@ func TestMetrics(t *testing.T) {
 			Arguments: map[string]any{},
 		},
 	}
-	resp, err := c.Metrics(context.TODO(), rqst)
+	resp, err := c.Metrics(context.Background(), rqst)
 	if err != nil {
 		t.Errorf("unable to invoke Metrics method")
 	}
@@ -166,14 +168,10 @@ func TestQuery(t *testing.T) {
 	server := httptest.NewServer(mux)
 	defer server.Close()
 
-	b, err := testdata.ModelVector.Type().MarshalJSON()
-	if err != nil {
-		msg := "unable to marshal Prometheus type"
-		logger.Error(msg, "err", err)
-		t.Error(msg)
-	}
-
-	want := string(b)
+	// JsonModelVector is the correct type to match "got"
+	// However, it's not value of "data" returned by the handler
+	// See the handler's response construction for more
+	want := string(testdata.JsonModelVector)
 	logger.Info("Output", "want", want)
 
 	mux.HandleFunc("/api/v1/query", func(w http.ResponseWriter, r *http.Request) {
@@ -214,10 +212,20 @@ func TestQuery(t *testing.T) {
 
 		logger.Info("Arguments", "query", query, "time", ts)
 
-		s := fmt.Sprintf(`{"data":%s,"status":"success"}`, want)
+		// Construction of this handler's response differs to the other tests
+		// In the other tests "data" is the value of "want"
+		// But, in this case, "model.Value" differs from "model.Vector"
+		// https://pkg.go.dev/github.com/prometheus/common/model#Value
+		// https://pkg.go.dev/github.com/prometheus/common/model#Vector
+		// I know "data" is correct by querying the Prometheus API directly
+		// http://localhost:9090/api/v1/query?query=up
+		// I don't understand how to construct "model.Value" (interface)
+		data := fmt.Sprintf(`{"resultType":"vector","result":%s}`, want)
+		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
+		logger.Info("response", "JSON", resp)
 
 		w.Header().Set("Content-Type", "application/json")
-		if _, err := w.Write([]byte(s)); err != nil {
+		if _, err := w.Write([]byte(resp)); err != nil {
 			msg := "error encoding JSON"
 			logger.Error(msg, "err", err)
 			http.Error(w, msg, http.StatusInternalServerError)
@@ -249,9 +257,9 @@ func TestQuery(t *testing.T) {
 			},
 		},
 	}
-	resp, err := c.Query(context.TODO(), rqst)
+	resp, err := c.Query(context.Background(), rqst)
 	if err != nil {
-		t.Errorf("unable to invoke Metrics method")
+		t.Errorf("unable to invoke Query method")
 	}
 
 	logger.Info("Response", "resp", resp)

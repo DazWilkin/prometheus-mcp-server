@@ -49,7 +49,7 @@ var (
 var (
 	JsonAlertsResult []byte = MustMarshal(AlertsResult)
 	JsonLabelValues  []byte = MustMarshal(LabelValues)
-	// JsonModelVector  []byte = ModelVector.Type().MarshalJSON()
+	JsonModelVector  []byte = MustMarshal(ModelVector)
 )
 
 // MustMarshal is a function that marshals a type to JSON ignoring errors
