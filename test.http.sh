@@ -70,8 +70,28 @@ source .env.test
 # `tools/call` (Query: range)
 # TODO(dazwilkin) Add "time" (and optional "timeout","limit")
 (
-    # TODO(dazwilkin) Parameterize JSON to account for dates
-    JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query_range","arguments":{"query":"up{job=\"prometheus\"}","start":"2025-06-13T10:00:00-07:00","end":"2025-06-13T11:00:00-07:00","step":"5m"}}}'
+    # E.g. 2025-06-14
+    DATE="$(date +%Y-%m-%d)"
+    ZONE="-07:00"
+    START="${DATE}T00:00:00${ZONE}"
+    END="${DATE}T23:59:59${ZONE}"
+    STEP="1h"
+    JSON="{
+      \"jsonrpc\":\"2.0\",
+      \"id\":2,
+      \"method\":\"tools/call\",
+      \"params\":{
+        \"name\":\"query_range\",
+        \"arguments\":{
+          \"query\":\"up{job='prometheus'}\",
+          \"start\":\"${START}\",
+          \"end\":\"${END}\",
+          \"step\":\"${STEP}\"
+        }
+      }
+    }"
+    echo ${JSON} | jq -r .
+
     curl \
     --request POST \
     --header "Content-Type: application/json" \
