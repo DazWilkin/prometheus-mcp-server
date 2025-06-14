@@ -19,10 +19,12 @@ quay.io/prometheus/prometheus:${VERS}
 
 ## MCP
 
+Pipe the `stdout` through `jq`:
+
 ```bash
 PORT="9090"
 
-go run ./cmd/server --prometheus=:${PORT}
+go run ./cmd/server --prometheus=:${PORT} | jq -r .
 ```
 
 ### `tools/list`
@@ -162,3 +164,15 @@ Yields:
     }
 }
 ```
+
+## Exporter
+
+The MCP server exports Prometheus metrics
+
+The metrics are prefix `mcp_prometheus_`
+
+|Name|Type|Description|
+|----|----|-----------|
+|`build`|Counter||
+|`total`|Counter||
+|`error`|Counter||
