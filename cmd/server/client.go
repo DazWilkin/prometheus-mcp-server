@@ -29,12 +29,12 @@ func NewClient(apiClient api.Client, logger *slog.Logger) *Client {
 }
 
 // Err is a function that combines logging, metrics and returning errors
-func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *ErrPrometheusClient) {
+func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *ErrClient) {
 	logger.Error(msg, "err", err)
 	errorx.With(prometheus.Labels{
 		"method": method,
 	}).Inc()
-	return mcp.NewToolResultError(msg), NewErrPrometheusClient(msg, err)
+	return mcp.NewToolResultError(msg), NewErrClient(msg, err)
 }
 
 // Alerts ia a method that queries Prometheus for a list of Alerts
