@@ -1,6 +1,25 @@
 # Prometheus MCP Server
 
-An MCP server for Prometheus
+An MCP server for [Prometheus](https://prometheus.io)
+
+Very much a work in progress: **not tested** in a MCP client host
+
++ Implements MCP `stdio` and HTTP streamable
++ Implements Prometheus [HTTP API](https://prometheus.io/docs/prometheus/latest/querying/api/) methods:
+  + [List alerts](https://prometheus.io/docs/prometheus/latest/querying/api/#alerts)
+  + [List Metrics](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values)
+  + [Instant queries](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
+  + [Range queries](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
+  + [List rules](https://prometheus.io/docs/prometheus/latest/querying/api/#rules)
+  + [List targets](https://prometheus.io/docs/prometheus/latest/querying/api/#targets)
+
+## Limitations
+
+A non-exhaustive list:
+
++ Naming: Everything currently in a single package
++ Prometheus API: Only partially implements
++ Testing: Not tested in an MCP host environment
 
 ## Prometheus
 
@@ -19,13 +38,60 @@ quay.io/prometheus/prometheus:${VERS}
 
 ## MCP
 
+### `stdio`
+
+Configured if `--server.addr==""`
+
 Pipe the `stdout` through `jq`:
 
 ```bash
 PORT="9090"
 
-go run ./cmd/server --prometheus=:${PORT} | jq -r .
+go run \
+./cmd/server \
+--prometheus=:${PORT} \
+| jq -r .
 ```
+
+### HTTP streamable
+
+Configured if `--server.addr!=""` defaults to `:7777` 
+
+`--server.path` defaults to `/mcp`
+
+Currently configured to be stateless because I'm unsure how to provide session IDs.
+
+```bash
+go run \
+./cmd/server \
+--server.addr=":7777" \
+--server.path="/mcp" \
+--prometheus=:${PORT}
+```
+
+### Prometheus metrics exporter
+
+Configured if `--metric.addr!=""` defaults to `:8080`
+
+`--metric.path` defaults to `/metrics`
+
+## API
+
+For `stdio` copy-paste examples below into server's stdin.
+
+See [`test.stdio.sh`](./test.stdio.sh)
+
+For HTTP streamable:
+
+```bash
+curl \
+--request POST \
+--header "Content-Type: application/json"
+--data '{json}' \
+http://{server.addr}/{server.path}
+```
+
+See [`test.http.sh`](./test.http.sh)
 
 ### `tools/list`
 
@@ -176,3 +242,7 @@ The metrics are prefix `mcp_prometheus_`
 |`build`|Counter||
 |`total`|Counter||
 |`error`|Counter||
+
+<hr/>
+<br/>
+<a href="https://www.buymeacoffee.com/dazwilkin" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
