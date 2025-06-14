@@ -219,10 +219,12 @@ func TestQuery(t *testing.T) {
 		// https://pkg.go.dev/github.com/prometheus/common/model#Vector
 		// I know "data" is correct by querying the Prometheus API directly
 		// http://localhost:9090/api/v1/query?query=up
-		// I don't understand how to construct "model.Value" (interface)
-		data := fmt.Sprintf(`{"resultType":"vector","result":%s}`, want)
+		// testdata.JsonModelValue uses the type (!) testdata.ModelValue
+		// This type exist solely to implement Prometheus' model.Value interface
+		// To be JSON marshaled into the correct value by this handler
+		data := testdata.JsonModelValue
 		resp := fmt.Sprintf(`{"data":%s,"status":"success"}`, data)
-		logger.Info("response", "JSON", resp)
+		logger.Info("response", "JSON", string(resp))
 
 		w.Header().Set("Content-Type", "application/json")
 		if _, err := w.Write([]byte(resp)); err != nil {

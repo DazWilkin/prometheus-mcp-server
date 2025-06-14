@@ -52,6 +52,21 @@ var (
 	JsonModelVector  []byte = MustMarshal(ModelVector)
 )
 
+// ModelValue implements Prometheus' model.Value interface
+// This implementation is necessary in order to correctly JSON marshal
+// TestQuery's handler response by creating a wrapped for ModelVector
+type ModelValue struct {
+	ResultType model.ValueType `json:"resultType"`
+	Result     model.Value     `json:"result"`
+}
+
+var (
+	JsonModelValue []byte = MustMarshal(ModelValue{
+		ResultType: ModelVector.Type(),
+		Result:     ModelVector,
+	})
+)
+
 // MustMarshal is a function that marshals a type to JSON ignoring errors
 func MustMarshal(x any) []byte {
 	b, err := json.Marshal(x)
