@@ -35,7 +35,9 @@ source .env.test
 )
 
 # `tools/call` (Query: instant)
+# TODO(dazwilkin) Add "time" (and optional "timeout","limit")
 (
+    # TODO(dazwilkin) Parameterize JSON to account for dates
     JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query","arguments":{"query":"up{job=\"prometheus\"}"}}}'
     curl \
     --request POST \
@@ -45,7 +47,9 @@ source .env.test
 )
 
 # `tools/call` (Query: range)
+# TODO(dazwilkin) Add "time" (and optional "timeout","limit")
 (
+    # TODO(dazwilkin) Parameterize JSON to account for dates
     JSON='{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"query_range","arguments":{"query":"up{job=\"prometheus\"}","start":"2025-06-13T10:00:00-07:00","end":"2025-06-13T11:00:00-07:00","step":"5m"}}}'
     curl \
     --request POST \
