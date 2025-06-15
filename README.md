@@ -9,12 +9,16 @@ Very much a work in progress: **not tested** in a MCP client host
 
 + Implements MCP `stdio` and HTTP streamable
 + Implements Prometheus [HTTP API](https://prometheus.io/docs/prometheus/latest/querying/api/) methods:
-  + [List alerts](https://prometheus.io/docs/prometheus/latest/querying/api/#alerts)
+  + [List Alertmanagers](https://prometheus.io/docs/prometheus/latest/querying/api/#alertmanagers)
+  + [List Alerts](https://prometheus.io/docs/prometheus/latest/querying/api/#alerts)
   + [List Metrics](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values)
   + [Instant queries](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
   + [Range queries](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
-  + [List rules](https://prometheus.io/docs/prometheus/latest/querying/api/#rules)
-  + [List targets](https://prometheus.io/docs/prometheus/latest/querying/api/#targets)
+  + [List Rules](https://prometheus.io/docs/prometheus/latest/querying/api/#rules)
+  + [List Status TSDB](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats)
+  + [List Targets](https://prometheus.io/docs/prometheus/latest/querying/api/#targets)
++ Implements [Prometheus Management API](https://prometheus.io/docs/prometheus/latest/management_api/)
+  + [Health check](https://prometheus.io/docs/prometheus/latest/management_api/) 
 
 ## Limitations
 
