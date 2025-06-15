@@ -1,9 +1,10 @@
-package main
+package handlers
 
 import (
 	"log/slog"
 	"time"
 
+	"github.com/DazWilkin/prometheus-mcp-server/errors"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 )
 
@@ -16,7 +17,7 @@ func extractOptions(args map[string]any, logger *slog.Logger) ([]v1.Option, erro
 		if err != nil {
 			msg := "unable to parse timeout"
 			logger.Error(msg, "err", err)
-			return opts, NewErrClient(msg, err)
+			return opts, errors.NewErrToolHandler(msg, err)
 		}
 		opts = append(opts, v1.WithTimeout(timeout))
 	}
@@ -45,7 +46,7 @@ func extractDuration(x any, logger *slog.Logger) (time.Duration, error) {
 		if err != nil {
 			msg := "unable to parse duration"
 			logger.Error(msg, "err", err)
-			return d, NewErrClient(msg, err)
+			return d, errors.NewErrToolHandler(msg, err)
 		}
 	}
 
@@ -62,7 +63,7 @@ func extractTimestamp(x any, logger *slog.Logger) (time.Time, error) {
 		if err != nil {
 			msg := "unable to parse time"
 			logger.Error(msg, "err", err)
-			return t, NewErrClient(msg, err)
+			return t, errors.NewErrToolHandler(msg, err)
 		}
 	}
 

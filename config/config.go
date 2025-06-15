@@ -1,9 +1,16 @@
-package main
+package config
 
 import (
 	"flag"
 	"fmt"
 	"log/slog"
+
+	"github.com/DazWilkin/prometheus-mcp-server/errors"
+)
+
+const (
+	Namespace string = "mcp"
+	Subsystem string = "prometheus"
 )
 
 // Config is a type that represent the app's configuration
@@ -32,7 +39,7 @@ func NewConfig(logger *slog.Logger) (*Config, error) {
 
 	if *prometheus == "" {
 		msg := "Flag '--prometheus' is required"
-		err := NewErrConfig(msg, nil)
+		err := errors.NewErrConfig(msg, nil)
 		logger.Error(msg, "err", err)
 		return nil, err
 	}

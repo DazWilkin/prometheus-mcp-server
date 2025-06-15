@@ -1,5 +1,5 @@
 // Not currently used
-package main
+package handlers
 
 import (
 	"context"

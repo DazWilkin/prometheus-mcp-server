@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/DazWilkin/prometheus-mcp-server/errors"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/prometheus/client_golang/api"
@@ -30,7 +31,7 @@ func NewClient(apiClient api.Client, logger *slog.Logger) *Client {
 }
 
 // Err is a function that combines logging, metrics and returning errors
-func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *ErrClient) {
+func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *errors.ErrToolHandler) {
 	logger.Error(msg, "err", err)
 
 	// Increment Prometheus error metric
@@ -38,7 +39,7 @@ func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResul
 		"tool": method,
 	}).Inc()
 
-	return mcp.NewToolResultError(msg), NewErrClient(msg, err)
+	return mcp.NewToolResultError(msg), errors.NewErrToolHandler(msg, err)
 }
 
 // Tools is a method that returns the MCP server tools implemeneted by Client

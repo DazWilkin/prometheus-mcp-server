@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"context"
@@ -6,19 +6,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/DazWilkin/prometheus-mcp-server/config"
 	"github.com/DazWilkin/prometheus-mcp-server/testdata"
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/prometheus/client_golang/api"
 )
 
-// Expect Prometheus server to be running
-const (
-	p string = "http://localhost:9090"
-)
-
-func TestClientTools(t *testing.T) {
+func TestMetaTools(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	// Define MCPServer
@@ -30,23 +25,15 @@ func TestClientTools(t *testing.T) {
 	)
 
 	// Create
-	// TODO(dazwilkin): Naming?
+	// TOOD(dazwilkin): Naming?
 	// TODO(dazwilkin): {} suggests refactoring to a function
 	{
-		config := Config{
+		config := config.Config{
 			Prometheus: p,
 		}
+		meta := NewMeta(config.Prometheus, logger)
 
-		// Create Prometheus API client
-		apiClient, err := api.NewClient(api.Config{
-			Address: config.Prometheus,
-		})
-		if err != nil {
-			t.Fatalf("unable to create Prometheus API client: %+q", err)
-		}
-
-		client := NewClient(apiClient, logger)
-		tools := client.Tools()
+		tools := meta.Tools()
 		s.AddTools(tools...)
 	}
 
@@ -82,7 +69,7 @@ func TestClientTools(t *testing.T) {
 		t.Logf("Initialize: %+v", resp)
 	}
 
-	// Ping the MCP client
+	// Ping (!) the MCP client
 	t.Log("Ping MCP client")
 	if err := client.Ping(ctx); err != nil {
 		t.Errorf("expected success: %+v", err)
@@ -102,15 +89,15 @@ func TestClientTools(t *testing.T) {
 
 	// CallTools
 	// testdata maps tool names to a map of tests
-	for tool, test := range testdata.ClientToolsTests {
+	for tool, test := range testdata.MetaToolsTests {
 		// test maps a test name to a map of tool params
 		for name, args := range test {
-			t.Logf("[%s] tool: %s; args: %+v",
-				name,
-				tool,
-				args,
-			)
 			t.Run(name, func(t *testing.T) {
+				t.Logf("[%s] tool: %s; args: %+v",
+					name,
+					tool,
+					args,
+				)
 				rqst := mcp.CallToolRequest{
 					Params: mcp.CallToolParams{
 						Name:      tool,

@@ -1,28 +1,31 @@
-package main
+package handlers
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
-	"time"
+
+	"github.com/DazWilkin/prometheus-mcp-server/errors"
+	"github.com/DazWilkin/prometheus-mcp-server/management"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Meta is a type that represents Prometheus Management API
 type Meta struct {
-	prometheus string
-	logger     *slog.Logger
+	client *management.Client
+	logger *slog.Logger
 }
 
 // NewMeta is a function that creates a new Meta
 func NewMeta(prometheus string, logger *slog.Logger) *Meta {
+	client := management.NewClient(prometheus, logger)
 	return &Meta{
-		prometheus: prometheus,
-		logger:     logger,
+		client: client,
+		logger: logger,
 	}
 }
 
@@ -47,7 +50,7 @@ func (x *Meta) Tools() []server.ServerTool {
 	return tools
 }
 
-// Ping is a method that pings the Prometheus service
+// Ping is a method that pings the Prometheus server's Management API's Readiness check
 func (x *Meta) Ping(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Ping"
 	logger := x.logger.With("method", method)
@@ -59,28 +62,13 @@ func (x *Meta) Ping(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToo
 		"tool": method,
 	}).Inc()
 
-	// Need an HTTP client
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
-
-	// Health endpoint
-	url := fmt.Sprintf("%s/-/healthy", x.prometheus)
-
-	resp, err := client.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			msg := "unable to close response body"
-			logger.Error(msg, "err", err)
-		}
-	}()
+	// Invoke Prometheus Management Ready method
+	respCode := x.client.Ready()
 
 	// Expect 200
-	if resp.StatusCode != http.StatusOK {
-		return nil, err
+	if respCode != http.StatusOK {
+		msg := "serv"
+		return mcp.NewToolResultError(msg), errors.NewErrToolHandler(msg, nil)
 	}
 
 	return mcp.NewToolResultText("OK"), nil

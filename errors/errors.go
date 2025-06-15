@@ -1,4 +1,4 @@
-package main
+package errors
 
 import (
 	"errors"
@@ -51,22 +51,22 @@ func (e *ErrConfig) Unwrap() error {
 	return e.Err
 }
 
-// ErrClient is a type that represents errors returned by Client
-type ErrClient struct {
+// ErrToolHandler is a type that represents errors returned by Client
+type ErrToolHandler struct {
 	Msg string
 	Err error
 }
 
-// NewErrClient is a function that creates a new ErrClient
-func NewErrClient(msg string, err error) *ErrClient {
-	return &ErrClient{
+// NewErrToolHandler is a function that creates a new ErrToolHandler
+func NewErrToolHandler(msg string, err error) *ErrToolHandler {
+	return &ErrToolHandler{
 		Msg: msg,
 		Err: err,
 	}
 }
 
 // Error is a method that implements the error interface for ErrClient
-func (e *ErrClient) Error() string {
+func (e *ErrToolHandler) Error() string {
 	// If there's a wrapped error, include its message
 	if e.Err != nil {
 		return fmt.Sprintf("%s: %s", e.Msg, e.Err.Error())
@@ -76,7 +76,7 @@ func (e *ErrClient) Error() string {
 }
 
 // GoString is a method that converts an ErrClient to its equivalent Go syntax
-func (e *ErrClient) GoString() string {
+func (e *ErrToolHandler) GoString() string {
 	// Handle pointer field
 	if e.Err != nil {
 		return fmt.Sprintf("&ErrClient{Msg: %q, Err: %v}", e.Msg, e.Err)
@@ -86,6 +86,6 @@ func (e *ErrClient) GoString() string {
 }
 
 // Unwrap is a method that unwraps any wrapped errors
-func (e *ErrClient) Unwrap() error {
+func (e *ErrToolHandler) Unwrap() error {
 	return e.Err
 }
