@@ -8,7 +8,7 @@ source .env.test
 # Must use group ({}) not subshell (()) to be able to terminate
 {
     PROMETHEUS="http://localhost:9090"
-    HEALTH="${PROMETHEUS}/-/health"
+    HEALTH="${PROMETHEUS}/-/healthy"
     CODE=$(\
       curl \
       --silent \
