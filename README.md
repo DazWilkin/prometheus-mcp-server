@@ -59,6 +59,7 @@ go run \
 --prometheus=:${PROM} \
 | jq -r .
 ```
+See [`tools/list`](#toolslist) for container example.
 
 ### HTTP streamable
 
@@ -83,6 +84,8 @@ go run \
 ```
 Or:
 ```bash
+IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:1234567890123456789012345678901234567890"
+
 MCPS="7777" # Prometheus MCP server
 MTRX="8080" # Prometheus MCP metrics exporter
 PROM="9090" # Upstream Prometheus server
@@ -94,12 +97,12 @@ podman run \
 --net=host \
 --publish=MCPS:MCSP/tcp \
 --publish=MTRX:MTRX/tcp \
-ghcr.io/dazwilkin/prometheus-gcp-server:1234567890123456789012345678901234567890 \
+${IMAGE} \
 --server.addr=":${MCPS}" \
 --server.path="/mcp" \
 --metric.addr=":${MTRX}" \
 --metric.path="/metrics" \
---prometheus=":${PROM}
+--prometheus="http://localhost:${PROM}
 ```
 
 ### Prometheus metrics exporter
@@ -168,6 +171,25 @@ Yields:
         ]
     }
 }
+```
+
+You may also pipe MCP (JSON-RPC) messages into the `prometheus-mcp-server` container:
+
+```bash
+IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:1234567890123456789012345678901234567890"
+
+JSON='{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+
+echo ${JSON} \
+| podman run \
+  --interactive --rm \
+  --net=host \
+  --name=prometheus-mcp-server \
+  ${IMAGE} \
+  --server.addr="" \
+  --metric.addr="" \
+  --prometheus=http://localhost:9090 \
+| jq -r .
 ```
 
 ### `tools/call`
@@ -277,12 +299,12 @@ The metrics are prefix `mcp_prometheus_`
 |`error`|Counter|Total number of unsuccessful MCP tool invocations|
 
 ## Sigstore
-`prometheus-gcp-server` container images are being signed by Sigstore and may be verified:
+`prometheus-mcp-server` container images are being signed by Sigstore and may be verified:
 
 ```bash
 go tools cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/prometheus-gcp-server:1234567890123456789012345678901234567890
+ghcr.io/dazwilkin/prometheus-mcp-server:1234567890123456789012345678901234567890
 ```
 
 > **Note**
