@@ -33,13 +33,13 @@ A non-exhaustive list:
 MCP server requires a Prometheus server
 
 ```bash
-PORT="9090"
+PROM="9090"
 VERS="v3.4.1"
 
 podman run \
 --interactive --tty --rm \
 --name=prometheus \
---publish=${PORT}:9090/tcp \
+--publish=${PROM}:9090/tcp \
 quay.io/prometheus/prometheus:${VERS}
 ```
 
@@ -52,11 +52,11 @@ Configured if `--server.addr==""`
 Pipe the `stdout` through `jq`:
 
 ```bash
-PORT="9090"
+PROM="9090"
 
 go run \
 ./cmd/server \
---prometheus=:${PORT} \
+--prometheus=:${PROM} \
 | jq -r .
 ```
 
@@ -69,11 +69,37 @@ Configured if `--server.addr!=""` defaults to `:7777`
 Currently configured to be stateless because I'm unsure how to provide session IDs.
 
 ```bash
+MCPS="7777"
+MTRX="8080"
+PROM="9090"
+
 go run \
 ./cmd/server \
---server.addr=":7777" \
+--metric.addr=":${MTRX}" \
+--metric.path="/metrics" \
+--server.addr=":${MCPS}" \
 --server.path="/mcp" \
---prometheus=:${PORT}
+--prometheus=:${PROM}
+```
+Or:
+```bash
+MCPS="7777" # Prometheus MCP server
+MTRX="8080" # Prometheus MCP metrics exporter
+PROM="9090" # Upstream Prometheus server
+
+# Uses --net=host to access upstream Prometheus
+# --publish= provided for documentation
+podman run \
+--interactive --tty --rm \
+--net=host \
+--publish=MCPS:MCSP/tcp \
+--publish=MTRX:MTRX/tcp \
+ghcr.io/dazwilkin/prometheus-gcp-server:1234567890123456789012345678901234567890 \
+--server.addr=":${MCPS}" \
+--server.path="/mcp" \
+--metric.addr=":${MTRX}" \
+--metric.path="/metrics" \
+--prometheus=":${PROM}
 ```
 
 ### Prometheus metrics exporter
@@ -246,9 +272,24 @@ The metrics are prefix `mcp_prometheus_`
 
 |Name|Type|Description|
 |----|----|-----------|
-|`build`|Counter||
-|`total`|Counter||
-|`error`|Counter||
+|`build`|Counter|A metric with a constant '1' value labels by build|start time, git commit, OS and Go versions|
+|`total`|Counter|Total number of successful MCP tool invocations|
+|`error`|Counter|Total number of unsuccessful MCP tool invocations|
+
+## Sigstore
+`prometheus-gcp-server` container images are being signed by Sigstore and may be verified:
+
+```bash
+go tools cosign verify \
+--key=./cosign.pub \
+ghcr.io/dazwilkin/prometheus-gcp-server:1234567890123456789012345678901234567890
+```
+
+> **Note**
+
+`cosign.pub` may be downloaded [here](./cosign.pub)
+
+`cosign` is included as a `go.mod` tool.
 
 <hr/>
 <br/>
