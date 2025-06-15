@@ -16,10 +16,12 @@ type Config struct {
 // NewConfig is a function that creates a new Config
 func NewConfig(logger *slog.Logger) (*Config, error) {
 	// MCP config
+	// If server.addr=="", MCP will be configured to use stdio not HTTP
 	serverAddr := flag.String("server.addr", ":7777", "Endpoint on which MCP tools are published")
 	serverPath := flag.String("server.path", "/mcp", "Path on which MCP tools are served")
 
 	// Metrics config
+	// If metric.addr=="", Prometheus metrics will **not** be exported
 	metricAddr := flag.String("metric.addr", ":8080", "Endpoint on which metrics are published")
 	metricPath := flag.String("metric.path", "/metrics", "Path on which metrics are served")
 

@@ -126,6 +126,9 @@ func metrics(c *Config, logger *slog.Logger) {
 }
 
 // run is a function that creates a Prometheus MCP server
+// The server combines:
+// 1. Prometheus HTTP API (Client) tools
+// 2. Prometheus Metadata (Meta) tools
 func run(c *Config, logger *slog.Logger) error {
 	function := "run"
 	logger = logger.With("function", function)
