@@ -2,6 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/DazWilkin/prometheus-mcp-server)](https://goreportcard.com/report/github.com/DazWilkin/prometheus-mcp-server)
 [![Go Reference](https://pkg.go.dev/badge/github.com/DazWilkin/prometheus-mcp-server.svg)](https://pkg.go.dev/github.com/DazWilkin/prometheus-mcp-server)
+[![build](https://github.com/DazWilkin/prometheus-mcp-server/actions/workflows/build.yml/badge.svg)](https://github.com/DazWilkin/prometheus-mcp-server/actions/workflows/build.yml)
 
 An MCP server for [Prometheus](https://prometheus.io)
 
