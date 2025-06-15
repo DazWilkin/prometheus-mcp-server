@@ -84,7 +84,7 @@ go run \
 ```
 Or:
 ```bash
-IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:1234567890123456789012345678901234567890"
+IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:14aceb25efd8a8fe18077e1e85186a4545bb2774"
 
 MCPS="7777" # Prometheus MCP server
 MTRX="8080" # Prometheus MCP metrics exporter
@@ -176,7 +176,7 @@ Yields:
 You may also pipe MCP (JSON-RPC) messages into the `prometheus-mcp-server` container:
 
 ```bash
-IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:1234567890123456789012345678901234567890"
+IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:14aceb25efd8a8fe18077e1e85186a4545bb2774"
 
 JSON='{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 
@@ -304,7 +304,7 @@ The metrics are prefix `mcp_prometheus_`
 ```bash
 go tools cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/prometheus-mcp-server:1234567890123456789012345678901234567890
+ghcr.io/dazwilkin/prometheus-mcp-server:14aceb25efd8a8fe18077e1e85186a4545bb2774
 ```
 
 > **Note**
