@@ -29,8 +29,20 @@ func NewClient(apiClient api.Client, logger *slog.Logger) *Client {
 	}
 }
 
-// Tools is a method that creates a slice of MCP server tools
-// For every tool defined in this method, there should be a handler method
+// Err is a function that combines logging, metrics and returning errors
+func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *ErrClient) {
+	logger.Error(msg, "err", err)
+
+	// Increment Prometheus error metric
+	errorx.With(prometheus.Labels{
+		"method": method,
+	}).Inc()
+
+	return mcp.NewToolResultError(msg), NewErrClient(msg, err)
+}
+
+// Tools is a method that returns the MCP server tools implemeneted by Client
+// For every tool defined in this method, there should be a corresponding handler method
 func (x *Client) Tools() []server.ServerTool {
 	method := "tools"
 	logger := x.logger.With("method", method)
@@ -130,18 +142,6 @@ func (x *Client) Tools() []server.ServerTool {
 		},
 	}
 	return tools
-}
-
-// Err is a function that combines logging, metrics and returning errors
-func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResult, *ErrClient) {
-	logger.Error(msg, "err", err)
-
-	// Increment Prometheus error metric
-	errorx.With(prometheus.Labels{
-		"method": method,
-	}).Inc()
-
-	return mcp.NewToolResultError(msg), NewErrClient(msg, err)
 }
 
 // Alertmanagers is a method that queries Prometheus for a list of Alertmanagers

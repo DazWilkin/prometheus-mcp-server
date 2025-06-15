@@ -12,11 +12,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// Meta is a type that represents Prometheus Management API
 type Meta struct {
 	prometheus string
 	logger     *slog.Logger
 }
 
+// NewMeta is a function that creates a new Meta
 func NewMeta(prometheus string, logger *slog.Logger) *Meta {
 	return &Meta{
 		prometheus: prometheus,
@@ -24,6 +26,8 @@ func NewMeta(prometheus string, logger *slog.Logger) *Meta {
 	}
 }
 
+// Tools is a method that returns the MCP server tools implemented by Meta
+// For every tool defined in this method, there should be a corresponding handler method
 func (x *Meta) Tools() []server.ServerTool {
 	method := "tools"
 	logger := x.logger.With("method", method)
