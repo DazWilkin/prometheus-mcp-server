@@ -1,0 +1,10 @@
+.github
+.vscode
+.env.test
+
+# Cosign private key
+cosign.key
+
+# Scripts
+test.http.sh
+test.stdio.sh
