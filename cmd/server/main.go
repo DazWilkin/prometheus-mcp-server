@@ -36,6 +36,7 @@ var (
 	StartTime = time.Now().Unix()
 )
 var (
+	// Build-related metrics
 	buildx = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name:      "build_info",
@@ -50,24 +51,26 @@ var (
 			"start_time",
 		},
 	)
+	// Counter of successful MCP tool invocations
 	totalx = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name:      "total",
 			Namespace: namespace,
 			Subsystem: subsystem,
-			Help:      "Total",
+			Help:      "Total number of successful MCP tool invocations",
 		}, []string{
-			"method",
+			"tool",
 		},
 	)
+	// Counter of unsuccessful (error-generating) MCP tool invocations
 	errorx = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name:      "error",
 			Namespace: namespace,
 			Subsystem: subsystem,
-			Help:      "Error",
+			Help:      "Total number of unsuccessful MCP tool invocations",
 		}, []string{
-			"method",
+			"tool",
 		},
 	)
 )

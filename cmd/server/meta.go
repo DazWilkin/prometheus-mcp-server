@@ -56,7 +56,7 @@ func (x *Meta) Ping(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToo
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Need an HTTP client

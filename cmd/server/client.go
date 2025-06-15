@@ -35,7 +35,7 @@ func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResul
 
 	// Increment Prometheus error metric
 	errorx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	return mcp.NewToolResultError(msg), NewErrClient(msg, err)
@@ -153,7 +153,7 @@ func (x *Client) Alertmanagers(ctx context.Context, rqst mcp.CallToolRequest) (*
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Invoke Prometheus Alertmanagers method
@@ -181,7 +181,7 @@ func (x *Client) Alerts(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Invoke Prometheus Alerts method
@@ -209,7 +209,7 @@ func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Invoke Prometheus LabelValues method
@@ -239,7 +239,7 @@ func (x *Client) Query(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Tool provides arguments; retrieve these
@@ -293,7 +293,7 @@ func (x *Client) QueryRange(ctx context.Context, rqst mcp.CallToolRequest) (*mcp
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	args := rqst.GetArguments()
@@ -361,7 +361,7 @@ func (x *Client) Rules(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Invoke Prometheus Rules method
@@ -389,7 +389,7 @@ func (x *Client) StatusTSDB(ctx context.Context, rqst mcp.CallToolRequest) (*mcp
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Invoke Prometheus Status TSDB method
@@ -417,7 +417,7 @@ func (x *Client) Targets(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
-		"method": method,
+		"tool": method,
 	}).Inc()
 
 	// Invoke Prometheus Targets method
