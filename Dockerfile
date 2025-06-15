@@ -12,6 +12,10 @@ WORKDIR /prometheus-mcp-server
 
 COPY go.* ./
 COPY cmd/server ./cmd/server
+COPY config ./config
+COPY errors ./errors
+COPY handlers ./handlers
+COPY management ./management
 COPY testdata ./testdata
 
 ARG TARGETOS
