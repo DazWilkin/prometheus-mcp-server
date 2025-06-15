@@ -10,17 +10,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/DazWilkin/prometheus-mcp-server/config"
+	"github.com/DazWilkin/prometheus-mcp-server/handlers"
 	"github.com/mark3labs/mcp-go/server"
 
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-)
-
-const (
-	namespace string = "mcp"
-	subsystem string = "prometheus"
 )
 
 var (
@@ -40,8 +37,8 @@ var (
 	buildx = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name:      "build_info",
-			Namespace: namespace,
-			Subsystem: subsystem,
+			Namespace: config.Namespace,
+			Subsystem: config.Subsystem,
 			Help:      "A metric with a constant '1' value labels by build|start time, git commit, OS and Go versions",
 		}, []string{
 			"build_time",
@@ -49,28 +46,6 @@ var (
 			"os_version",
 			"go_version",
 			"start_time",
-		},
-	)
-	// Counter of successful MCP tool invocations
-	totalx = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name:      "total",
-			Namespace: namespace,
-			Subsystem: subsystem,
-			Help:      "Total number of successful MCP tool invocations",
-		}, []string{
-			"tool",
-		},
-	)
-	// Counter of unsuccessful (error-generating) MCP tool invocations
-	errorx = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name:      "error",
-			Namespace: namespace,
-			Subsystem: subsystem,
-			Help:      "Total number of unsuccessful MCP tool invocations",
-		}, []string{
-			"tool",
 		},
 	)
 )
@@ -100,7 +75,7 @@ func getLogger() *slog.Logger {
 }
 
 // metrics is a function that creates a Prometheus exporter
-func metrics(c *Config, logger *slog.Logger) {
+func metrics(c *config.Config, logger *slog.Logger) {
 	function := "metrics"
 	logger = logger.With("function", function)
 
@@ -132,7 +107,7 @@ func metrics(c *Config, logger *slog.Logger) {
 // The server combines:
 // 1. Prometheus HTTP API (Client) tools
 // 2. Prometheus Metadata (Meta) tools
-func run(c *Config, logger *slog.Logger) error {
+func run(c *config.Config, logger *slog.Logger) error {
 	function := "run"
 	logger = logger.With("function", function)
 
@@ -160,7 +135,7 @@ func run(c *Config, logger *slog.Logger) error {
 			os.Exit(1)
 		}
 
-		client := NewClient(apiClient, logger)
+		client := handlers.NewClient(apiClient, logger)
 		s.AddTools(client.Tools()...)
 	}
 
@@ -168,7 +143,7 @@ func run(c *Config, logger *slog.Logger) error {
 	// TODO(dazwilkin): Naming?
 	// TODO(dazwilkin): {} suggests refactoring to a function
 	{
-		meta := NewMeta(c.Prometheus, logger)
+		meta := handlers.NewMeta(c.Prometheus, logger)
 		s.AddTools(meta.Tools()...)
 	}
 
@@ -208,7 +183,7 @@ func run(c *Config, logger *slog.Logger) error {
 func main() {
 	logger := getLogger()
 
-	config, err := NewConfig(logger)
+	config, err := config.NewConfig(logger)
 	if err != nil {
 		msg := "unable to create new config"
 		logger.Error(msg, "err", err)
