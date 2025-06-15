@@ -4,6 +4,48 @@ set -x
 
 source .env.test
 
+# Expects Prometheus server
+# Must use group ({}) not subshell (()) to be able to terminate
+{
+    PROMETHEUS="http://localhost:9090"
+    HEALTH="${PROMETHEUS}/-/health"
+    CODE=$(\
+      curl \
+      --silent \
+      --get \
+      ${HEALTH} \
+      --output /dev/null \
+      --write-out '%{response_code}')
+
+    if [[ "${CODE}" != "200" ]]
+    then
+      printf "Unable to get Prometheus Health endpoint (%s) got: %s; want: 200\n" "${HEALTH}" "${CODE}"
+      exit 1
+    fi
+}
+
+# Expects Prometheus MCP server
+# MCP "ping"
+# Must use group ({}) not subshell (()) to be able to terminate
+{
+    JSON='{"jsonrpc": "2.0","method": "ping","id": 1}'
+    CODE=$(\
+      curl \
+      --silent \
+      --request POST \
+      --header "Content-Type: application/json" \
+      --data "${JSON}" \
+      http://${SERVER_ADDR}/${SERVER_PATH} \
+      --output /dev/null \
+      --write-out '%{response_code}')
+    
+    if [[ "${CODE}" != "200" ]]
+    then
+      printf "Unable to 'Ping' Prometheus MCP server (%s) got %s; want: 200\n" "${SERVER_ADDR}:${SERVER_PATH}" "${CODE}"
+      exit 1
+    fi
+}
+
 # `tools/list`
 (
     JSON='{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
