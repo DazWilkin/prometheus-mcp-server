@@ -185,13 +185,18 @@ func (x *Client) Alertmanagers(ctx context.Context, rqst mcp.CallToolRequest) (*
 	}).Inc()
 
 	// Invoke Prometheus Alertmanagers method
-	alertmanagers, err := x.v1api.AlertManagers(ctx)
+	result, err := x.v1api.AlertManagers(ctx)
 	if err != nil {
 		msg := "unable to retrieve alertmanagers"
 		return Err(method, msg, err, logger)
 	}
 
-	b, err := json.Marshal(alertmanagers)
+	logger.Info("Alertmanagers retrieved",
+		"active", len(result.Active),
+		"dropped", len(result.Dropped),
+	)
+
+	b, err := json.Marshal(result)
 	if err != nil {
 		msg := "unable to marshal alertmanagers"
 		return Err(method, msg, err, logger)
@@ -213,13 +218,17 @@ func (x *Client) Alerts(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 	}).Inc()
 
 	// Invoke Prometheus Alerts method
-	alerts, err := x.v1api.Alerts(ctx)
+	result, err := x.v1api.Alerts(ctx)
 	if err != nil {
 		msg := "unable to retrieve alerts"
 		return Err(method, msg, err, logger)
 	}
 
-	b, err := json.Marshal(alerts)
+	logger.Info("Alerts retrieved",
+		"alerts", len(result.Alerts),
+	)
+
+	b, err := json.Marshal(result)
 	if err != nil {
 		msg := "unable to marshal alerts"
 		return Err(method, msg, err, logger)
@@ -241,18 +250,22 @@ func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 	}).Inc()
 
 	// Invoke Prometheus LabelValues method
-	values, warnings, err := x.v1api.LabelValues(ctx, "__name__", nil, time.Time{}, time.Time{})
+	labelvalues, warnings, err := x.v1api.LabelValues(ctx, "__name__", nil, time.Time{}, time.Time{})
 	if err != nil {
 		msg := "unable to retrieve metrics"
 		return Err(method, msg, err, logger)
 	}
+
+	logger.Info("Metrics retrieved",
+		"metrics", len(labelvalues),
+	)
 
 	// If there are warnings, log them
 	if len(warnings) != 0 {
 		logger.Info("Warnings", "warnings", warnings)
 	}
 
-	b, err := json.Marshal(values)
+	b, err := json.Marshal(labelvalues)
 	if err != nil {
 		msg := "unable to marshal metrics"
 		return Err(method, msg, err, logger)
@@ -402,13 +415,17 @@ func (x *Client) Rules(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 	}).Inc()
 
 	// Invoke Prometheus Rules method
-	rules, err := x.v1api.Rules(ctx)
+	result, err := x.v1api.Rules(ctx)
 	if err != nil {
 		msg := "unable to retrieve rules"
 		return Err(method, msg, err, logger)
 	}
 
-	b, err := json.Marshal(rules)
+	logger.Info("Rules retrieved",
+		"rules", len(result.Groups),
+	)
+
+	b, err := json.Marshal(result)
 	if err != nil {
 		msg := "unable to marshal targets"
 		return Err(method, msg, err, logger)
@@ -459,18 +476,22 @@ func (x *Client) Series(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	// Invoke Prometheus Series method
-	series, warnings, err := x.v1api.Series(ctx, matches, startTime, endTime, opts...)
+	results, warnings, err := x.v1api.Series(ctx, matches, startTime, endTime, opts...)
 	if err != nil {
 		msg := "unable to retrieve rules"
 		return Err(method, msg, err, logger)
 	}
+
+	logger.Info("Series retrieved",
+		"series", len(results),
+	)
 
 	// If there are warnings, log them
 	if len(warnings) != 0 {
 		logger.Info("Warnings", "warnings", warnings)
 	}
 
-	b, err := json.Marshal(series)
+	b, err := json.Marshal(results)
 	if err != nil {
 		msg := "unable to marshal targets"
 		return Err(method, msg, err, logger)
@@ -519,13 +540,18 @@ func (x *Client) Targets(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 	}).Inc()
 
 	// Invoke Prometheus Targets method
-	targets, err := x.v1api.Targets(ctx)
+	result, err := x.v1api.Targets(ctx)
 	if err != nil {
 		msg := "unable to retrieve targets"
 		return Err(method, msg, err, logger)
 	}
 
-	b, err := json.Marshal(targets)
+	logger.Info("Targets retrieved",
+		"active", len(result.Active),
+		"dropped", len(result.Dropped),
+	)
+
+	b, err := json.Marshal(result)
 	if err != nil {
 		msg := "unable to marshal targets"
 		return Err(method, msg, err, logger)
