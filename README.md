@@ -314,7 +314,7 @@ The metrics are prefix `mcp_prometheus_`
 `prometheus-mcp-server` container images are being signed by Sigstore and may be verified:
 
 ```bash
-go tools cosign verify \
+go tool cosign verify \
 --key=./cosign.pub \
 ghcr.io/dazwilkin/prometheus-mcp-server:c014cc8ede3390736abc089dd30317132f8d87fd
 ```
