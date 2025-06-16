@@ -20,7 +20,7 @@ import (
 )
 
 func TestAlertmanagers(t *testing.T) {
-	t.Skip("Test not implemented")
+	t.Skip("Test not implemented but covered by tools tests")
 }
 
 // TestAlerts tests Alerts
@@ -89,6 +89,11 @@ func TestAlerts(t *testing.T) {
 	if got != want {
 		t.Errorf("got:\n%s\nwant:\n%s", got, want)
 	}
+}
+
+// TestExemplars tests Exemplars
+func TestExemplars(t *testing.T) {
+	t.Skip("Test not implemented but covered by tools tests")
 }
 
 // TestMetrics test Metrics
@@ -276,13 +281,21 @@ func TestQuery(t *testing.T) {
 }
 
 func TestQueryRange(t *testing.T) {
-	t.Skip("Test not implemented")
+	t.Skip("Test not implemented but covered by tools tests")
 }
 
 func TestRules(t *testing.T) {
-	t.Skip("Test not implemented")
+	t.Skip("Test not implemented but covered by tools tests")
+}
+
+func TestSeries(t *testing.T) {
+	t.Skip("Test not implemented but covered by tools tests")
+}
+
+func TestStatusTSDB(t *testing.T) {
+	t.Skip("Test not implemented but covered by tools tests")
 }
 
 func TestTargets(t *testing.T) {
-	t.Skip("Test not implemented")
+	t.Skip("Test not implemented but covered by tools tests")
 }

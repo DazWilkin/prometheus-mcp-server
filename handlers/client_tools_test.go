@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"testing"
@@ -111,20 +112,24 @@ func TestClientTools(t *testing.T) {
 				tool,
 				args,
 			)
-			t.Run(name, func(t *testing.T) {
-				rqst := mcp.CallToolRequest{
-					Params: mcp.CallToolParams{
-						Name:      tool,
-						Arguments: args,
-					},
-				}
-				resp, err := client.CallTool(ctx, rqst)
-				if err != nil {
-					t.Errorf("expected success: %+v", err)
-				}
+			t.Run(
+				// Create a unique test name that combines tool and test names
+				fmt.Sprintf("%s/%s", tool, name),
+				func(t *testing.T) {
+					rqst := mcp.CallToolRequest{
+						Params: mcp.CallToolParams{
+							Name:      tool,
+							Arguments: args,
+						},
+					}
+					resp, err := client.CallTool(ctx, rqst)
+					if err != nil {
+						t.Errorf("expected success: %+v", err)
+					}
 
-				t.Logf("Response: %+v", resp)
-			})
+					t.Logf("Response: %+v", resp)
+				},
+			)
 		}
 	}
 }

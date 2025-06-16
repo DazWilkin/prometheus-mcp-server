@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"testing"
@@ -92,25 +93,29 @@ func TestMetaTools(t *testing.T) {
 	for tool, test := range testdata.MetaToolsTests {
 		// test maps a test name to a map of tool params
 		for name, args := range test {
-			t.Run(name, func(t *testing.T) {
-				t.Logf("[%s] tool: %s; args: %+v",
-					name,
-					tool,
-					args,
-				)
-				rqst := mcp.CallToolRequest{
-					Params: mcp.CallToolParams{
-						Name:      tool,
-						Arguments: args,
-					},
-				}
-				resp, err := client.CallTool(ctx, rqst)
-				if err != nil {
-					t.Errorf("expected success: %+v", err)
-				}
+			t.Run(
+				// Create a unique test name that combines tool and test names
+				fmt.Sprintf("%s/%s", tool, name),
+				func(t *testing.T) {
+					t.Logf("[%s] tool: %s; args: %+v",
+						name,
+						tool,
+						args,
+					)
+					rqst := mcp.CallToolRequest{
+						Params: mcp.CallToolParams{
+							Name:      tool,
+							Arguments: args,
+						},
+					}
+					resp, err := client.CallTool(ctx, rqst)
+					if err != nil {
+						t.Errorf("expected success: %+v", err)
+					}
 
-				t.Logf("Response: %+v", resp)
-			})
+					t.Logf("Response: %+v", resp)
+				},
+			)
 		}
 	}
 }
