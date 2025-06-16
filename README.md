@@ -16,6 +16,7 @@ Very much a work in progress: **not tested** in a MCP client host
   + [Instant queries](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
   + [Range queries](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
   + [List Rules](https://prometheus.io/docs/prometheus/latest/querying/api/#rules)
+  + [List Series](https://prometheus.io/docs/prometheus/latest/querying/api/#finding-series-by-label-matchers)
   + [List Status TSDB](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats)
   + [List Targets](https://prometheus.io/docs/prometheus/latest/querying/api/#targets)
 + Implements [Prometheus Management API](https://prometheus.io/docs/prometheus/latest/management_api/)
@@ -264,6 +265,16 @@ With `time`, `timeout`
 Yields:
 ```JSON
 {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"{\"groups\":[]}"}]}}
+```
+
+#### `series`
+
+```JSON
+{"jsonrpc": "2.0","id": 2,"method":"tools/call","params":{"name":"series","arguments":{"match[]":["up{}","up{job=\"prometheus\"}"]}}}
+```
+Yields:
+```JSON
+{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"[{\"__name__\":\"up\",\"app\":\"prometheus\",\"instance\":\"localhost:9090\",\"job\":\"prometheus\"}]"}]}}
 ```
 
 #### `targets`

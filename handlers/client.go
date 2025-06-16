@@ -129,6 +129,33 @@ func (x *Client) Tools() []server.ServerTool {
 		},
 		{
 			Tool: mcp.NewTool(
+				"series",
+				mcp.WithDescription("Prometheus Series"),
+				// https://prometheus.io/docs/prometheus/latest/querying/api/#finding-series-by-label-matchers
+				// The query string parameter is "match[]"
+				mcp.WithArray("match[]",
+					// Need to define the type of the array
+					// https://github.com/mark3labs/mcp-go/blob/607df92aa3eac5bbb2f1e1edb2a5fc1da2601c94/examples/typed_tools/main.go#L49
+					mcp.Items(map[string]any{"type": "string"}),
+					mcp.Required(),
+					mcp.Description("Repeated series selector argument that selects the series"),
+				),
+				mcp.WithString("start",
+					mcp.Required(),
+					mcp.Description("Start timestamp (RFC-3339 or Unix)"),
+				),
+				mcp.WithString("end",
+					mcp.Required(),
+					mcp.Description("End timestamp (RFC-3339 or Unix)"),
+				),
+				mcp.WithNumber("limit",
+					mcp.Description("Maximum number of returned series"),
+				),
+			),
+			Handler: x.Series,
+		},
+		{
+			Tool: mcp.NewTool(
 				"status_tsdb",
 				mcp.WithDescription("Prometheus Status: TSDB"),
 			),
@@ -378,6 +405,64 @@ func (x *Client) Rules(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 		return Err(method, msg, err, logger)
 	}
 
+	return mcp.NewToolResultText(string(b)), nil
+}
+
+// Series is a method that queries Prometheus for a list of Series
+func (x *Client) Series(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	method := "Series"
+	logger := x.logger.With("method", method)
+	logger.Info("Entered")
+	defer logger.Info("Exited")
+
+	// Increment Prometheus total metric
+	totalx.With(prometheus.Labels{
+		"tool": method,
+	}).Inc()
+
+	args := rqst.GetArguments()
+
+	// Required
+	matches, err := extractMatches(args["match[]"], logger)
+	if err != nil {
+		msg := "unable to extract repeated 'match[]' parameters"
+		return Err(method, msg, err, logger)
+	}
+
+	startTime, err := extractTimestamp(args["start"], logger)
+	if err != nil {
+		msg := "unable to extract 'start' parameter"
+		return Err(method, msg, err, logger)
+	}
+
+	endTime, err := extractTimestamp(args["end"], logger)
+	if err != nil {
+		msg := "unable to extract 'end' parameter"
+		return Err(method, msg, err, logger)
+	}
+
+	// Optional
+	// Optional for Prometheus API method: timeout,limit
+	opts, err := extractOptions(args, logger)
+	if err != nil {
+		msg := "unable to extract optional arguments"
+		return Err(method, msg, err, logger)
+	}
+
+	// Invoke Prometheus Series method
+	series, warnings, err := x.v1api.Series(ctx, matches, startTime, endTime, opts...)
+	if err != nil {
+		msg := "unable to retrieve rules"
+		return Err(method, msg, err, logger)
+	}
+
+	logger.Info("Warnings", "warnings", warnings)
+
+	b, err := json.Marshal(series)
+	if err != nil {
+		msg := "unable to marshal targets"
+		return Err(method, msg, err, logger)
+	}
 	return mcp.NewToolResultText(string(b)), nil
 }
 

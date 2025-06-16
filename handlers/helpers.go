@@ -69,3 +69,22 @@ func extractTimestamp(x any, logger *slog.Logger) (time.Time, error) {
 
 	return t, nil
 }
+
+// extractMatches is a function that extracts recurring "match[]" from an argument
+func extractMatches(x any, logger *slog.Logger) ([]string, error) {
+	if mm, ok := x.([]any); !ok {
+		msg := "unable to extract repeated 'match[]' parameters"
+		logger.Info(msg)
+		return nil, errors.NewErrToolHandler(msg, nil)
+	} else {
+		matches := make([]string, len(mm))
+		for i, v := range mm {
+			if matches[i], ok = v.(string); !ok {
+				msg := "unable to convert a 'match[] parameter"
+				logger.Info(msg, "match[]", v)
+				return nil, errors.NewErrToolHandler(msg, nil)
+			}
+		}
+		return matches, nil
+	}
+}
