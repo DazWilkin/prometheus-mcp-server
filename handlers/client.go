@@ -67,6 +67,25 @@ func (x *Client) Tools() []server.ServerTool {
 		},
 		{
 			Tool: mcp.NewTool(
+				"exemplars",
+				mcp.WithDescription("Prometheus Exemplars"),
+				mcp.WithString("query",
+					mcp.Required(),
+					mcp.Description("Prometheus expression query string"),
+				),
+				mcp.WithString("start",
+					mcp.Required(),
+					mcp.Description("Start timestamp (RFC-3339)"),
+				),
+				mcp.WithString("end",
+					mcp.Required(),
+					mcp.Description("End timestamp (RFC-3339)"),
+				),
+			),
+			Handler: x.Exemplars,
+		},
+		{
+			Tool: mcp.NewTool(
 				"metrics",
 				mcp.WithDescription("Prometheus Metrics"),
 			),
@@ -81,7 +100,7 @@ func (x *Client) Tools() []server.ServerTool {
 					mcp.Description("Prometheus expression query string"),
 				),
 				mcp.WithString("time",
-					mcp.Description("Evaluation timestamp (RFC-3339 or Unix)"),
+					mcp.Description("Evaluation timestamp (RFC-3339)"),
 				),
 				mcp.WithString("timeout",
 					mcp.Description("Evaluation timeout"),
@@ -102,11 +121,11 @@ func (x *Client) Tools() []server.ServerTool {
 				),
 				mcp.WithString("start",
 					mcp.Required(),
-					mcp.Description("Start timestamp (RFC-3339 or Unix)"),
+					mcp.Description("Start timestamp (RFC-3339)"),
 				),
 				mcp.WithString("end",
 					mcp.Required(),
-					mcp.Description("End timestamp (RFC-3339 or Unix)"),
+					mcp.Description("End timestamp (RFC-3339)"),
 				),
 				mcp.WithString("step",
 					mcp.Required(),
@@ -142,11 +161,11 @@ func (x *Client) Tools() []server.ServerTool {
 				),
 				mcp.WithString("start",
 					mcp.Required(),
-					mcp.Description("Start timestamp (RFC-3339 or Unix)"),
+					mcp.Description("Start timestamp (RFC-3339)"),
 				),
 				mcp.WithString("end",
 					mcp.Required(),
-					mcp.Description("End timestamp (RFC-3339 or Unix)"),
+					mcp.Description("End timestamp (RFC-3339)"),
 				),
 				mcp.WithNumber("limit",
 					mcp.Description("Maximum number of returned series"),
@@ -237,6 +256,53 @@ func (x *Client) Alerts(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 	return mcp.NewToolResultText(string(b)), nil
 }
 
+// Exemplars is a method that queries Prometheus for a list of Exemplars
+func (x *Client) Exemplars(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	method := "Exemplars"
+	logger := x.logger.With("method", method)
+	logger.Info("Entered")
+	defer logger.Info("Exited")
+
+	// Increment Prometheus total metric
+	totalx.With(prometheus.Labels{
+		"tool": method,
+	}).Inc()
+
+	// Tool provides arguments; retrieve these
+	// required: query, start, end
+	args := rqst.GetArguments()
+	// Required
+	query := args["query"].(string)
+	startTime, err := extractTimestamp(args["start"], logger)
+	if err != nil {
+		msg := "unable to extract 'start' parameter"
+		return Err(method, msg, err, logger)
+	}
+	endTime, err := extractTimestamp(args["end"], logger)
+	if err != nil {
+		msg := "unable to extract 'end' parameter"
+		return Err(method, msg, err, logger)
+	}
+
+	// Invoke Prometheus Exemplars method
+	results, err := x.v1api.QueryExemplars(ctx, query, startTime, endTime)
+	if err != nil {
+		msg := "unable to retrieve exemplars"
+		return Err(method, msg, err, logger)
+	}
+
+	logger.Info("Exemplars retrieved",
+		"exemplars", len(results),
+	)
+	b, err := json.Marshal(results)
+	if err != nil {
+		msg := "unable to marshal exemplars"
+		return Err(method, msg, err, logger)
+	}
+
+	return mcp.NewToolResultText(string(b)), nil
+}
+
 // Metrics is a method that queries Prometheus for a list of Metrics
 func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Metrics"
@@ -249,8 +315,15 @@ func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 		"tool": method,
 	}).Inc()
 
+	// Tool provides no arguments (neither required nor optional)
+	// Define parameters
+	label := "__name__"
+	var matches []string
+	startTime := time.Time{}
+	endTime := time.Time{}
+
 	// Invoke Prometheus LabelValues method
-	labelvalues, warnings, err := x.v1api.LabelValues(ctx, "__name__", nil, time.Time{}, time.Time{})
+	labelvalues, warnings, err := x.v1api.LabelValues(ctx, label, matches, startTime, endTime)
 	if err != nil {
 		msg := "unable to retrieve metrics"
 		return Err(method, msg, err, logger)
