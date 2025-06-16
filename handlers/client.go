@@ -247,7 +247,10 @@ func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 		return Err(method, msg, err, logger)
 	}
 
-	logger.Info("Warnings", "warnings", warnings)
+	// If there are warnings, log them
+	if len(warnings) != 0 {
+		logger.Info("Warnings", "warnings", warnings)
+	}
 
 	b, err := json.Marshal(values)
 	if err != nil {
@@ -301,7 +304,10 @@ func (x *Client) Query(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 		return Err(method, msg, err, logger)
 	}
 
-	logger.Info("Warnings", "warnings", warnings)
+	// If there are warnings, log them
+	if len(warnings) != 0 {
+		logger.Info("Warnings", "warnings", warnings)
+	}
 
 	b, err := json.Marshal(value)
 	if err != nil {
@@ -369,7 +375,10 @@ func (x *Client) QueryRange(ctx context.Context, rqst mcp.CallToolRequest) (*mcp
 		return Err(method, msg, err, logger)
 	}
 
-	logger.Info("Warnings", "warnings", warnings)
+	// If there are warnings, log them
+	if len(warnings) != 0 {
+		logger.Info("Warnings", "warnings", warnings)
+	}
 
 	b, err := json.Marshal(value)
 	if err != nil {
@@ -456,7 +465,10 @@ func (x *Client) Series(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 		return Err(method, msg, err, logger)
 	}
 
-	logger.Info("Warnings", "warnings", warnings)
+	// If there are warnings, log them
+	if len(warnings) != 0 {
+		logger.Info("Warnings", "warnings", warnings)
+	}
 
 	b, err := json.Marshal(series)
 	if err != nil {
