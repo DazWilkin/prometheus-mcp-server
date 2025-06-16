@@ -27,9 +27,42 @@ Very much a work in progress: **not tested** in a MCP client host
 
 A non-exhaustive list:
 
-+ Naming: Everything currently in a single package
 + Prometheus API: Only partially implements
-+ Testing: Not tested in an MCP host environment
+
+## Visual Studio Code GitHub Copilot agent
+
+Functions as an MCP host and can be configured to interact with `prometheus-mcp-server`.
+
+See [Use MCP servers in VS Code (Preview)](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) to configure this.
+
+`.vscode/mcp.json`:
+```JSON
+{
+    "servers": {
+        "prometheus-mcp-server": {
+            "url": "http://localhost:7777/mcp"
+        }
+    }
+}
+```
+
+Then open "Chat" and ensure it's configured for "Agent" (bottom left hand corner of the chat window).
+
+The tools icon should list the `prometheus-mcp-server` tools and you can:
+
+```console
+#ping
+```
+```console
+#metrics
+```
+```console
+#query up{job="prometheus"}
+```
+
+> **NOTE** There's an issue with `metrics`. The server responds correctly and chat responds with "Here is a list of all available Prometheus metrics currently exposed by your server. If you need details or want to query a specific metric, let me know which one you're interested in!" but the metrics aren't listed. You must ask the agent to "give me the metrics filtered by ..." for example "filtered by promhttp_metric_handler_requests_total".
+
+For further ways to interact with the MCP server, try "CTRL-SHIFT-P" and e.g. `MCP: List Servers`, select `prometheus-mcp-server` and then select one of the commands.
 
 ## Prometheus
 
