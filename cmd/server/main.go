@@ -52,8 +52,14 @@ var (
 
 // getLogger is a function that creates a logger
 // It also logs the build info and records the build info metric
-func getLogger() *slog.Logger {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+func getLogger(debug bool) *slog.Logger {
+
+	opts := &slog.HandlerOptions{}
+	if debug {
+		opts.Level = slog.LevelDebug
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))
 
 	// Create Prometheus 'static' counter for build config
 	logger.Info("Build config",
@@ -169,8 +175,11 @@ func run(c *config.Config, logger *slog.Logger) error {
 		server.WithEndpointPath(c.Server.Path), // Default endpoint path
 		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
 			logger := logger.With("function", "WithHttpContextFunc")
-			logger.Info("Entered")
-			defer logger.Info("Exited")
+			logger.Debug("Entered")
+			defer logger.Debug("Exited")
+
+			// Headers
+			logger.Debug("Headers", "headers", r.Header)
 
 			// Does nothing
 			return ctx
@@ -181,14 +190,14 @@ func run(c *config.Config, logger *slog.Logger) error {
 }
 
 func main() {
-	logger := getLogger()
-
-	config, err := config.NewConfig(logger)
+	config, err := config.NewConfig()
 	if err != nil {
 		msg := "unable to create new config"
-		logger.Error(msg, "err", err)
+		slog.Error(msg, "err", err)
 		os.Exit(1)
 	}
+
+	logger := getLogger(config.Debug)
 
 	// If configured, start Prometheus metrics exporter in Go routine
 	// Check only --metric.addr since --metric.path is optional (default: /metrics)

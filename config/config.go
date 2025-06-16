@@ -3,7 +3,6 @@ package config
 import (
 	"flag"
 	"fmt"
-	"log/slog"
 
 	"github.com/DazWilkin/prometheus-mcp-server/errors"
 )
@@ -18,10 +17,11 @@ type Config struct {
 	Prometheus string
 	Server     Server
 	Metric     Metric
+	Debug      bool
 }
 
 // NewConfig is a function that creates a new Config
-func NewConfig(logger *slog.Logger) (*Config, error) {
+func NewConfig() (*Config, error) {
 	// MCP config
 	// If server.addr=="", MCP will be configured to use stdio not HTTP
 	serverAddr := flag.String("server.addr", ":7777", "Endpoint on which MCP tools are published")
@@ -35,12 +35,14 @@ func NewConfig(logger *slog.Logger) (*Config, error) {
 	// Prometheus server
 	prometheus := flag.String("prometheus", "http://localhost:9090", "Endpoint of Prometheus server")
 
+	// Debug
+	debug := flag.Bool("debug", false, "Enable debug logging")
+
 	flag.Parse()
 
 	if *prometheus == "" {
 		msg := "Flag '--prometheus' is required"
 		err := errors.NewErrConfig(msg, nil)
-		logger.Error(msg, "err", err)
 		return nil, err
 	}
 
@@ -54,6 +56,7 @@ func NewConfig(logger *slog.Logger) (*Config, error) {
 			Addr: *metricAddr,
 			Path: *metricPath,
 		},
+		Debug: *debug,
 	}, nil
 }
 
