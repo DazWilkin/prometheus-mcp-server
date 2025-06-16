@@ -32,9 +32,11 @@ var (
 	// StartTime is the start time of the exporter represented as a UNIX epoch
 	StartTime = time.Now().Unix()
 )
-var (
+
+// buildmetrics is a function that creates a Prometheus metric for build information
+func buildmetrics() {
 	// Build-related metrics
-	buildx = promauto.NewCounterVec(
+	buildx := promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name:      "build_info",
 			Namespace: config.Namespace,
@@ -48,7 +50,16 @@ var (
 			"start_time",
 		},
 	)
-)
+	// Record the values
+	buildx.With(prometheus.Labels{
+		"build_time": BuildTime,
+		"git_commit": GitCommit,
+		"os_version": OSVersion,
+		"go_version": GoVersion,
+		"start_time": strconv.FormatInt(StartTime, 10),
+	}).Inc()
+
+}
 
 // getLogger is a function that creates a logger
 // It also logs the build info and records the build info metric
@@ -69,19 +80,33 @@ func getLogger(debug bool) *slog.Logger {
 		"go_version", GoVersion,
 		"start_time", strconv.FormatInt(StartTime, 10),
 	)
-	buildx.With(prometheus.Labels{
-		"build_time": BuildTime,
-		"git_commit": GitCommit,
-		"os_version": OSVersion,
-		"go_version": GoVersion,
-		"start_time": strconv.FormatInt(StartTime, 10),
-	}).Inc()
 
 	return logger
 }
 
-// metrics is a function that creates a Prometheus exporter
-func metrics(c *config.Config, logger *slog.Logger) {
+// interceptor is a function that intercepts the HTTP request context
+// The MCP server is configured to use this interceptor but it exists solely to log when it's called
+// It is invoked when GitHub Copilot Agent performs MCP server restart|start|stop operations
+// These actions are received as POST requests to the MCP server's endpoint path
+// And the Content_Type is set to "application/json"
+// And the Content-Length is non-zero (!)
+// But the body is empty
+func interceptor(logger *slog.Logger) func(ctx context.Context, r *http.Request) context.Context {
+	return func(ctx context.Context, r *http.Request) context.Context {
+		logger := logger.With("function", "interceptor")
+		logger.Debug("Entered")
+		defer logger.Debug("Exited")
+
+		// Headers
+		logger.Debug("Headers", "headers", r.Header)
+
+		// Does nothing
+		return ctx
+	}
+}
+
+// exporter is a function that creates a Prometheus exporter
+func exporter(c *config.Config, logger *slog.Logger) {
 	function := "metrics"
 	logger = logger.With("function", function)
 
@@ -173,46 +198,51 @@ func run(c *config.Config, logger *slog.Logger) error {
 	)
 	streamOpts := []server.StreamableHTTPOption{
 		server.WithEndpointPath(c.Server.Path), // Default endpoint path
-		server.WithHTTPContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			logger := logger.With("function", "WithHttpContextFunc")
-			logger.Debug("Entered")
-			defer logger.Debug("Exited")
-
-			// Headers
-			logger.Debug("Headers", "headers", r.Header)
-
-			// Does nothing
-			return ctx
-		}),
+		server.WithHTTPContextFunc(interceptor(logger)),
 		server.WithStateLess(true),
 	}
 	return server.NewStreamableHTTPServer(s, streamOpts...).Start(c.Server.Addr)
 }
 
 func main() {
-	config, err := config.NewConfig()
+	c, err := config.NewConfig()
 	if err != nil {
 		msg := "unable to create new config"
 		slog.Error(msg, "err", err)
 		os.Exit(1)
 	}
 
-	logger := getLogger(config.Debug)
+	logger := getLogger(c.Debug)
 
 	// If configured, start Prometheus metrics exporter in Go routine
 	// Check only --metric.addr since --metric.path is optional (default: /metrics)
-	if config.Metric.Addr != "" {
+	if c.Metric.Addr != "" {
 		logger.Info("Starting Prometheus metrics exporter",
-			"metric.addr", config.Metric.Addr,
-			"metric.path", config.Metric.Path,
+			"metric.addr", c.Metric.Addr,
+			"metric.path", c.Metric.Path,
 		)
-		go metrics(config, logger)
+
+		// Create and report build metrics
+		buildmetrics()
+
+		// Create|Start Prometheus metrics exporter in a Go routine
+		go exporter(c, logger)
 	}
 
 	// Create|Start MCP server
 	logger.Info("Starting Prometheus MCP server")
-	if err := run(config, logger); err != nil {
+	up := promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name:      "up",
+			Namespace: config.Namespace,
+			Subsystem: config.Subsystem,
+			Help:      "1 if the MCP server is up, 0 otherwise",
+		}, nil,
+	)
+	up.With(nil).Set(1)
+	if err := run(c, logger); err != nil {
 		msg := "unable to server"
 		logger.Error(msg, "err", err)
+		up.With(nil).Set(0)
 	}
 }
