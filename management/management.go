@@ -31,8 +31,8 @@ func NewClient(prometheus string, logger *slog.Logger) *Client {
 // Do is a function that invokes Prometheus Management API methods
 func (x *Client) Do(method string) int {
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	url := fmt.Sprintf("%s/-/%s", x.prometheus, method)
 
@@ -41,6 +41,7 @@ func (x *Client) Do(method string) int {
 		return http.StatusInternalServerError
 	}
 	defer func() {
+		x.logger.Debug("Closing response body", "url", url)
 		if err := resp.Body.Close(); err != nil {
 			msg := "unable to close response body"
 			logger.Error(msg, "err", err)

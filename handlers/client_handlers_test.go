@@ -187,6 +187,7 @@ func TestQuery(t *testing.T) {
 			http.Error(w, msg, http.StatusInternalServerError)
 		}
 		defer func() {
+			t.Log("Closing request body")
 			if err := r.Body.Close(); err != nil {
 				msg := "unable to close request body"
 				t.Logf("%s: %+q", msg, err)

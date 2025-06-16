@@ -34,8 +34,8 @@ func NewMeta(prometheus string, logger *slog.Logger) *Meta {
 func (x *Meta) Tools() []server.ServerTool {
 	method := "tools"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	tools := []server.ServerTool{
 		{
@@ -54,8 +54,8 @@ func (x *Meta) Tools() []server.ServerTool {
 func (x *Meta) Ping(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Ping"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{

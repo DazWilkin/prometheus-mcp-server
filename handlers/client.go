@@ -47,8 +47,8 @@ func Err(method, msg string, err error, logger *slog.Logger) (*mcp.CallToolResul
 func (x *Client) Tools() []server.ServerTool {
 	method := "tools"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	tools := []server.ServerTool{
 		{
@@ -195,8 +195,8 @@ func (x *Client) Tools() []server.ServerTool {
 func (x *Client) Alertmanagers(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Alertmanagers"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -228,8 +228,8 @@ func (x *Client) Alertmanagers(ctx context.Context, rqst mcp.CallToolRequest) (*
 func (x *Client) Alerts(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Alerts"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -260,8 +260,8 @@ func (x *Client) Alerts(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 func (x *Client) Exemplars(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Exemplars"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -307,8 +307,8 @@ func (x *Client) Exemplars(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.
 func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Metrics"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -351,8 +351,8 @@ func (x *Client) Metrics(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Ca
 func (x *Client) Query(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Query"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -408,8 +408,8 @@ func (x *Client) Query(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 func (x *Client) QueryRange(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "QueryRange"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -479,8 +479,8 @@ func (x *Client) QueryRange(ctx context.Context, rqst mcp.CallToolRequest) (*mcp
 func (x *Client) Rules(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Rules"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -511,8 +511,8 @@ func (x *Client) Rules(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Call
 func (x *Client) Series(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Series"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -576,8 +576,8 @@ func (x *Client) Series(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.Cal
 func (x *Client) StatusTSDB(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "StatusTSDB"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
@@ -604,8 +604,8 @@ func (x *Client) StatusTSDB(ctx context.Context, rqst mcp.CallToolRequest) (*mcp
 func (x *Client) Targets(ctx context.Context, rqst mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	method := "Targets"
 	logger := x.logger.With("method", method)
-	logger.Info("Entered")
-	defer logger.Info("Exited")
+	logger.Debug("Entered")
+	defer logger.Debug("Exited")
 
 	// Increment Prometheus total metric
 	totalx.With(prometheus.Labels{
