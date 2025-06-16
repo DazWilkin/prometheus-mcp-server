@@ -10,11 +10,12 @@ Very much a work in progress: **not tested** in a MCP client host
 
 + Implements MCP `stdio` and HTTP streamable
 + Implements Prometheus [HTTP API](https://prometheus.io/docs/prometheus/latest/querying/api/) methods:
-  + [List Alertmanagers](https://prometheus.io/docs/prometheus/latest/querying/api/#alertmanagers)
-  + [List Alerts](https://prometheus.io/docs/prometheus/latest/querying/api/#alerts)
-  + [List Metrics](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values)
   + [Instant queries](https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries)
   + [Range queries](https://prometheus.io/docs/prometheus/latest/querying/api/#range-queries)
+  + [List Alertmanagers](https://prometheus.io/docs/prometheus/latest/querying/api/#alertmanagers)
+  + [List Alerts](https://prometheus.io/docs/prometheus/latest/querying/api/#alerts)
+  + [List Exemplars](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-exemplars)
+  + [List Metrics](https://prometheus.io/docs/prometheus/latest/querying/api/#querying-label-values)
   + [List Rules](https://prometheus.io/docs/prometheus/latest/querying/api/#rules)
   + [List Series](https://prometheus.io/docs/prometheus/latest/querying/api/#finding-series-by-label-matchers)
   + [List Status TSDB](https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-stats)
