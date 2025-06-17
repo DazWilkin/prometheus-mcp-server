@@ -96,117 +96,13 @@ list() {
   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
 }
 
-# `tools/call`(Foo)
+# `tools/call`({name} {arguments}})
 call() {
   local METHOD="call"
   local NAME="${1}"
   local ARGUMENTS="${2}"
   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
 }
-
-# # `tools/call` (Alertmanagers)
-# call_alertmanagers() {
-#   local METHOD="call"
-#   local NAME="alertmanagers"
-#   local ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Alerts)
-# call_alerts() {
-#   local METHOD="call"
-#   local NAME="alerts"
-#   local ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Exemplars)
-# call_exemplars() {
-#   local METHOD="call"
-#   local NAME="exemplars"
-#   local ARGUMENTS
-#   ARGUMENTS=$(\
-#     go tool jsonnet \
-#     --ext-str "QUERY=${QUERY}" \
-#     --ext-str "START=${START}" \
-#     --ext-str "END=${END}" \
-#     ./testjson/exemplars.jsonnet \
-#     | jq -r .)
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Metrics)
-# call_metrics() {
-#   METHOD="call"
-#   NAME="metrics"
-#   ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Ping)
-# call_ping() {
-#   local METHOD="call"
-#   local NAME="ping"
-#   local ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"  
-# }
-
-# # `tools/call` (Query: instant)
-# call_query() {
-#   local METHOD="call"
-#   local NAME="query"
-#   local ARGUMENTS
-#   ARGUMENTS=$(\
-#     go tool jsonnet \
-#     --ext-str "QUERY=${QUERY}" \
-#     --ext-str "START=${START}" \
-#     --ext-str "END=${END}" \
-#     --ext-str "STEP=${STEP}" \
-#     ./testjson/query.jsonnet \
-#     | jq -r .)
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Query: range)
-# # TODO(dazwilkin) Add "time" (and optional "timeout","limit")
-# call_query_range() {
-#   local METHOD="call"
-#   local NAME="query_range"
-#   local ARGUMENTS
-#   ARGUMENTS=$(\
-#   go tool jsonnet \
-#   --ext-str "QUERY=${QUERY}" \
-#   --ext-str "START=${START}" \
-#   --ext-str "END=${END}" \
-#   --ext-str "STEP=${STEP}" \
-#   ./testjson/query_range.jsonnet \
-#   | jq -r .)
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Rules)
-# call_rules() {
-#   local METHOD="call"
-#   local NAME="rules"
-#   local ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Status TSDB)
-# call_status_tsdb() {
-#   local METHOD="call"
-#   local NAME="status_tsdb"
-#   local ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
-
-# # `tools/call` (Targets)
-# call_targets() {
-#   local METHOD="call"
-#   local NAME="targets"
-#   local ARGUMENTS=""
-#   jsonrpc "${METHOD}" "${NAME}" "${ARGUMENTS}"
-# }
 
 # Use Jsonnet to generate the JSON arguments for those tools that need them
 JSON_EXEMPLARS=$(\
