@@ -8,7 +8,7 @@ local labels = {
 };
 
 // Needs to remain as-is so that GitHub Workflow can replace it on updates
-local image = "ghcr.io/dazwilkin/prometheus-mcp-server:6613baa763f417593a89d51a027c5417593b9706";
+local image = "ghcr.io/dazwilkin/prometheus-mcp-server:978fce6f18369f328aa918e733809b5661712ffd";
 
 // host|port are expected to be environment variable names
 // Used to parse environment variables
