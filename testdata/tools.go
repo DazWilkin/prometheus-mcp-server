@@ -59,7 +59,7 @@ var (
 		},
 		"exemplars": {
 			"required": {
-				"query": "up{}",
+				"query": query,
 				"start": start,
 				"end":   end,
 			},
