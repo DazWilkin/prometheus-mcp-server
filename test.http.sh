@@ -4,8 +4,7 @@ set -x
 
 source .env.test
 
-SERVER="${SERVER_HOST}:${SERVER_PORT}/${SERVER_PATH}"
-METRIC="${METRIC_HOST}:${METRIC_PORT}/${METRIC_PATH}"
+SERVER="https://${NAME}.${TAILNET}"
 
 QUERY="up{job='prometheus'}"
 
@@ -22,8 +21,7 @@ LIMIT="10"
 # Expects Prometheus server
 # Must use group ({}) not subshell (()) to be able to terminate
 {
-    PROMETHEUS="http://localhost:9090"
-    HEALTH="${PROMETHEUS}/-/healthy"
+    HEALTH="${PROMETHEUS_URL}/-/healthy"
     CODE=$(\
       curl \
       --silent \
@@ -50,7 +48,7 @@ LIMIT="10"
       --request POST \
       --header "Content-Type: application/json" \
       --data "${JSON}" \
-      http://${SERVER} \
+      ${SERVER}/mcp \
       --output /dev/null \
       --write-out '%{response_code}')
     
@@ -68,7 +66,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Alertmanagers)
@@ -78,7 +76,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Alerts)
@@ -88,7 +86,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Exemplars)
@@ -112,7 +110,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 }
 
 # `tools/call` (Metrics)
@@ -122,7 +120,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Ping)
@@ -132,7 +130,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Query: instant)
@@ -159,7 +157,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Query: range)
@@ -185,7 +183,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Rules)
@@ -195,7 +193,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Status TSDB)
@@ -205,7 +203,7 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # `tools/call` (Targets)
@@ -215,13 +213,18 @@ LIMIT="10"
     --request POST \
     --header "Content-Type: application/json" \
     --data "${JSON}" \
-    http://${SERVER}
+    ${SERVER}/mcp
 )
 
 # Grep Prometheus metrics
 (
-    curl \
-    --silent \
-    --get \
-    http://${METRIC} | awk '/^mcp_prometheus_/'
+  FILTER='
+   .data.result[]
+   |"\(.metric.__name__){tool=\(.metric.tool)} \(.value[1])"'
+  curl \
+  --silent \
+  --get \
+  --data-urlencode "query={__name__=~\"mcp_prometheus_.*\"}" \
+  ${PROMETHEUS_URL}/api/v1/query \
+  | jq -r "${FILTER}"
 )
