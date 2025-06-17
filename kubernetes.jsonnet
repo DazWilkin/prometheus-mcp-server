@@ -98,6 +98,50 @@ local deployment = {
     },
 };
 
+local rule = {
+    "apiVersion": "monitoring.coreos.com/v1",
+    "kind": "PrometheusRule",
+    "metadata": {
+        "name": name,
+        "labels": labels,
+    },
+    "spec": {
+        "groups": [
+            {
+                "name": name,
+                "rules": [
+                    {
+                        local minutes = 5,
+                        "alert": "PrometheusMCPServerDown",
+                        "expr": "up{job=\"mcp-server\"} == 0",
+                        "for": "%(for)dm" % { "for": minutes },
+                        "labels": {
+                            "severity": "critical"
+                        },
+                        "annotations": {
+                            "summary": "Prometheus MCP server is down",
+                            "description": "Prometheus MCP server has been down for more than 5 minutes."
+                        },
+                    },
+                    {
+                        local minutes = 5,
+                        "alert": "PrometheusMCPToolErrors",
+                        "expr": "mcp_prometheus_error",
+                        "for": "%(for)dm" % { "for": minutes },
+                        "labels": {
+                            "severity": "warning"
+                        },
+                        "annotations": {
+                            "summary": "Prometheus MCP tool reporting errors",
+                            "description": "Prometheus MCP tool ({{ $labels.tool }}) reporting errors ({{ $value }})"
+                        },
+                    },
+                ],
+            },
+        ],
+    },
+};
+
 local secret = {
     "apiVersion": "v1",
     "kind": "Secret",
@@ -200,6 +244,7 @@ local vpa = {
         secret,
         service_account,
         deployment,
+        rule,
         service,
         vpa,
         service_monitor,
