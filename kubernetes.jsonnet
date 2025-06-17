@@ -98,6 +98,33 @@ local deployment = {
     },
 };
 
+local ingress = {
+    "apiVersion": "networking.k8s.io/v1",
+    "kind": "Ingress",
+    "metadata": {
+        "name": name,
+        "labels": labels,
+    },
+    "spec": {
+        "defaultBackend": {
+            "service": {
+                "name": name,
+                "port": {
+                    "number": config.server.port,
+                },
+            },
+        },
+        "ingressClassName": "tailscale",
+        "tls": [
+            {
+                "hosts": [
+                    name,
+                ],
+            },
+        ],
+    },
+};
+
 local rule = {
     "apiVersion": "monitoring.coreos.com/v1",
     "kind": "PrometheusRule",
@@ -241,12 +268,13 @@ local vpa = {
         "name": "list",
     },
     "items": [
-        secret,
-        service_account,
         deployment,
+        ingress,
         rule,
+        secret,
         service,
-        vpa,
+        service_account,
         service_monitor,
+        vpa,
     ],
 }
