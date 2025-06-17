@@ -8,7 +8,7 @@ local labels = {
 };
 
 // Needs to remain as-is so that GitHub Workflow can replace it on updates
-local image = "ghcr.io/dazwilkin/prometheus-mcp-server:9c2f0987302f23f533c31e2cc8eafe02fa477232";
+local image = "ghcr.io/dazwilkin/prometheus-mcp-server:8a9a6010dacb0224ca49ec34df8b17a835558280";
 
 // port must be a number
 // So that it can be referenced as such in Deployment|Service specs etc.
