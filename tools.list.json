@@ -1,0 +1,256 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "tools": [
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Alertmanagers",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "alertmanagers"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Alerts",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "alerts"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Exemplars",
+        "inputSchema": {
+          "properties": {
+            "end": {
+              "description": "End timestamp (RFC-3339)",
+              "type": "string"
+            },
+            "query": {
+              "description": "Prometheus expression query string",
+              "type": "string"
+            },
+            "start": {
+              "description": "Start timestamp (RFC-3339)",
+              "type": "string"
+            }
+          },
+          "required": [
+            "query",
+            "start",
+            "end"
+          ],
+          "type": "object"
+        },
+        "name": "exemplars"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Metrics",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "metrics"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Ping the Prometheus sevrer",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "ping"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Query",
+        "inputSchema": {
+          "properties": {
+            "limit": {
+              "description": "Maximum number of returned series",
+              "type": "number"
+            },
+            "query": {
+              "description": "Prometheus expression query string",
+              "type": "string"
+            },
+            "time": {
+              "description": "Evaluation timestamp (RFC-3339)",
+              "type": "string"
+            },
+            "timeout": {
+              "description": "Evaluation timeout",
+              "type": "string"
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "type": "object"
+        },
+        "name": "query"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Query Range",
+        "inputSchema": {
+          "properties": {
+            "end": {
+              "description": "End timestamp (RFC-3339)",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Maximum number of returned series",
+              "type": "number"
+            },
+            "query": {
+              "description": "Prometheus expression query string",
+              "type": "string"
+            },
+            "start": {
+              "description": "Start timestamp (RFC-3339)",
+              "type": "string"
+            },
+            "step": {
+              "description": "Query resolution step width in duration format",
+              "type": "string"
+            },
+            "timeout": {
+              "description": "Evaluation timeout",
+              "type": "string"
+            }
+          },
+          "required": [
+            "query",
+            "start",
+            "end",
+            "step"
+          ],
+          "type": "object"
+        },
+        "name": "query_range"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Rules",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "rules"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Series",
+        "inputSchema": {
+          "properties": {
+            "end": {
+              "description": "End timestamp (RFC-3339)",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Maximum number of returned series",
+              "type": "number"
+            },
+            "match[]": {
+              "description": "Repeated series selector argument that selects the series",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "start": {
+              "description": "Start timestamp (RFC-3339)",
+              "type": "string"
+            }
+          },
+          "required": [
+            "match[]",
+            "start",
+            "end"
+          ],
+          "type": "object"
+        },
+        "name": "series"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Status: TSDB",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "status_tsdb"
+      },
+      {
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "description": "Prometheus Targets",
+        "inputSchema": {
+          "properties": {},
+          "type": "object"
+        },
+        "name": "targets"
+      }
+    ]
+  }
+}
