@@ -72,7 +72,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions"
 
-          for FILENAME in "./README.md"
+          for FILENAME in "./README.md" "./kubernetes.jsonnet"
           do
             sed \
             --in-place \
