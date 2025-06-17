@@ -193,44 +193,7 @@ See [`test.http.sh`](./test.http.sh)
 ```JSON
 {"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}
 ```
-Yields:
-```JSON
-{
-    "jsonrpc":"2.0",
-    "id":1,
-    "result":{
-        "tools":[
-            {
-                "annotations":{
-                    "readOnlyHint":false,
-                    "destructiveHint":true,
-                    "idempotentHint":false,
-                    "openWorldHint":true
-                },
-                "description":"Prometheus Metrics",
-                "inputSchema":{
-                    "properties":{},
-                    "type":"object"
-                },
-                "name":"metrics"
-            },{
-                "annotations":{
-                    "readOnlyHint":false,
-                    "destructiveHint":true,
-                    "idempotentHint":false,
-                    "openWorldHint":true
-                },
-                "description":"Prometheus Targets",
-                "inputSchema":{
-                    "properties":{},
-                    "type":"object"
-                },
-                "name":"targets"
-            }
-        ]
-    }
-}
-```
+Yields [`tools.list.json`](./tools.list.json)
 
 You may also pipe MCP (JSON-RPC) messages into the `prometheus-mcp-server` container:
 
