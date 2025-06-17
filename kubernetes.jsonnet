@@ -1,4 +1,4 @@
-local name = "prometheus-mcp-server";
+local name = std.extVar("NAME");
 
 local labels = {
     "app": name,
@@ -10,14 +10,9 @@ local labels = {
 // Needs to remain as-is so that GitHub Workflow can replace it on updates
 local image = "ghcr.io/dazwilkin/prometheus-mcp-server:978fce6f18369f328aa918e733809b5661712ffd";
 
-// host|port are expected to be environment variable names
-// Used to parse environment variables
-// port is converted to a number
+// port must be a number
 // So that it can be referenced as such in Deployment|Service specs etc.
-local server(env_host, env_port) = {
-    local host = std.extVar(env_host),
-    local port = std.parseJson(std.extVar(env_port)),
-
+local server(host, port) = {
     "host": host,
     "port": port,
 };
@@ -31,9 +26,9 @@ local addr(server) = "%(host)s:%(port)d" % server;
 // 2. Metrics server
 // 3. Prometheus URL
 local config = {
-    "server": server("SERVER_HOST", "SERVER_PORT"),
-    "metric": server("METRIC_HOST", "METRIC_PORT"),
-    "prometheus": std.extVar("PROMETHEUS_URL"),
+    "server": server("0.0.0.0", 7777),
+    "metric": server("0.0.0.0", 8080),
+    "prometheus": "http://prometheus-operated.monitoring.svc.cluster.local:9090",
 };
 
 // Represents GHCR authentication
@@ -84,8 +79,10 @@ local deployment = {
                         "name": name,
                         "image": image,
                         "args": [
-                            "--server.addr=%(addr)s" % addr(config.server), // { "addr": config.server.addr },
-                            "--metric.addr=%(addr)s" % addr(config.metric), //{ "addr": config.metric.addr },
+                            // Addresses must be Pod local (0.0.0.0)
+                            // The respective (external) host addresses are used by scripts
+                            "--server.addr=%(addr)s" % addr(config.server),
+                            "--metric.addr=%(addr)s" % addr(config.metric),
                             "--prometheus=%(prometheus)s" % { "prometheus": config.prometheus },
                             // Defaults need not be set
                             // "--server.path=/mcp",
