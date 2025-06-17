@@ -28,7 +28,7 @@ local addr(server) = "%(host)s:%(port)d" % server;
 local config = {
     "server": server("0.0.0.0", 7777),
     "metric": server("0.0.0.0", 8080),
-    "prometheus": "http://prometheus-operated.monitoring.svc.cluster.local:9090",
+    "prometheus": "http://prometheus-operated.observability.svc.cluster.local:9090",
 };
 
 // Represents GHCR authentication

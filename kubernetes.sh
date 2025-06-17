@@ -4,7 +4,7 @@ set -x
 
 source .env.test
 
-jsonnet \
+go tool jsonnet \
 --ext-str "NAME=${NAME}" \
 --ext-str "GHCR_USERNAME=${GHCR_USERNAME}" \
 --ext-str "GHCR_EMAIL=${GHCR_EMAIL}" \
