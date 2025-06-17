@@ -88,11 +88,12 @@ Configured if `--server.addr==""`
 Pipe the `stdout` through `jq`:
 
 ```bash
-PROM="9090"
+ # Upstream Prometheus server
+PROMETHEUS_URL="http://localhost:9090"
 
 go run \
 ./cmd/server \
---prometheus=:${PROM} \
+--prometheus="${PROMETHEUS_URL}" \
 | jq -r .
 ```
 See [`tools/list`](#toolslist) for container example.
@@ -106,39 +107,61 @@ Configured if `--server.addr!=""` defaults to `:7777`
 Currently configured to be stateless because I'm unsure how to provide session IDs.
 
 ```bash
-MCPS="7777"
-MTRX="8080"
-PROM="9090"
+# Prometheus MCP server
+SERVER_HOST="0.0.0.0"
+SERVER_PORT="7777"
+SERVER_ADDR="${SERVER_HOST}:${SERVER_PORT}"
+SERVER_PATH="/mcp"
+
+# Prometheus MCP metrics exporter
+METRIC_HOST="0.0.0.0"
+METRIC_PORT="8080"
+METRIC_ADDR="${METRIC_HOST}:${METRIC_PORT}"
+METRIC_PATH="/metrics"
+
+ # Upstream Prometheus server
+PROMETHEUS_URL="http://localhost:9090"
 
 go run \
 ./cmd/server \
---metric.addr=":${MTRX}" \
---metric.path="/metrics" \
---server.addr=":${MCPS}" \
---server.path="/mcp" \
---prometheus=:${PROM}
+--server.addr="${SERVER_ADDR}" \
+--server.path="${SERVER_PATH}" \
+--metric.addr="${METRIC_ADDR}" \
+--metric.path="${METRIC_PATH}" \
+--prometheus="${PROMETHEUS_URL}"
 ```
 Or:
 ```bash
 IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:6613baa763f417593a89d51a027c5417593b9706"
 
-MCPS="7777" # Prometheus MCP server
-MTRX="8080" # Prometheus MCP metrics exporter
-PROM="9090" # Upstream Prometheus server
+# Prometheus MCP server
+SERVER_HOST="0.0.0.0"
+SERVER_PORT="7777"
+SERVER_ADDR="${SERVER_HOST}:${SERVER_PORT}"
+SERVER_PATH="/mcp"
+
+# Prometheus MCP metrics exporter
+METRIC_HOST="0.0.0.0"
+METRIC_PORT="8080"
+METRIC_ADDR="${METRIC_HOST}:${METRIC_PORT}"
+METRIC_PATH="/metrics"
+
+ # Upstream Prometheus server
+PROMETHEUS_URL="http://localhost:9090"
 
 # Uses --net=host to access upstream Prometheus
 # --publish= provided for documentation
 podman run \
 --interactive --tty --rm \
 --net=host \
---publish=MCPS:MCSP/tcp \
---publish=MTRX:MTRX/tcp \
+--publish="${SERVER_PORT}:${SERVER_PORT}/tcp" \
+--publish="${METRIC_PORT}:${METRIC_PORT}/tcp" \
 ${IMAGE} \
---server.addr=":${MCPS}" \
---server.path="/mcp" \
---metric.addr=":${MTRX}" \
---metric.path="/metrics" \
---prometheus="http://localhost:${PROM}
+--server.addr="${SERVER_ADDR}" \
+--server.path="${SERVER_PATH}" \
+--metric.addr="${METRIC_ADDR}" \
+--metric.path="${METRIC_PATH}" \
+--prometheus="${PROMETHEUS_URL}"
 ```
 
 ### Prometheus metrics exporter
@@ -214,6 +237,9 @@ You may also pipe MCP (JSON-RPC) messages into the `prometheus-mcp-server` conta
 ```bash
 IMAGE="ghcr.io/dazwilkin/prometheus-mcp-server:6613baa763f417593a89d51a027c5417593b9706"
 
+ # Upstream Prometheus server
+PROMETHEUS_URL="http://localhost:9090"
+
 JSON='{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 
 echo ${JSON} \
@@ -224,7 +250,7 @@ echo ${JSON} \
   ${IMAGE} \
   --server.addr="" \
   --metric.addr="" \
-  --prometheus=http://localhost:9090 \
+  --prometheus="${PROMETHEUS_URL}" \
 | jq -r .
 ```
 
