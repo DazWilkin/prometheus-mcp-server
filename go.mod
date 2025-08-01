@@ -3,7 +3,7 @@ module github.com/DazWilkin/prometheus-mcp-server
 go 1.24.4
 
 require (
-	github.com/mark3labs/mcp-go v0.32.0
+	github.com/mark3labs/mcp-go v0.36.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/common v0.64.0
 )
@@ -68,8 +68,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.9.1 // indirect
+	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/buildkite/agent/v3 v3.95.1 // indirect
 	github.com/buildkite/go-pipeline v0.13.3 // indirect
 	github.com/buildkite/interpolate v0.1.5 // indirect
@@ -149,6 +151,7 @@ require (
 	github.com/in-toto/attestation v1.1.1 // indirect
 	github.com/in-toto/in-toto-golang v0.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/invopop/jsonschema v0.13.0 // indirect
 	github.com/jedisct1/go-minisign v0.0.0-20230811132847-661be99b8267 // indirect
 	github.com/jellydator/ttlcache/v3 v3.3.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
@@ -223,6 +226,7 @@ require (
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	github.com/vbatts/tar-split v0.11.6 // indirect
 	github.com/withfig/autocomplete-tools/integrations/cobra v1.2.1 // indirect
+	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
