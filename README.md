@@ -4,7 +4,9 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/DazWilkin/prometheus-mcp-server.svg)](https://pkg.go.dev/github.com/DazWilkin/prometheus-mcp-server)
 [![build](https://github.com/DazWilkin/prometheus-mcp-server/actions/workflows/build.yml/badge.svg)](https://github.com/DazWilkin/prometheus-mcp-server/actions/workflows/build.yml)
 
-An MCP server for [Prometheus](https://prometheus.io)
+An MCP server for [Prometheus](https://prometheus.io).
+
+Requires an MCP host (e.g. Gemini Code Assist or GitHub Copilot) as a client.
 
 Very much a work in progress: **not tested** in a MCP client host
 
