@@ -274,6 +274,7 @@ require (
 tool (
 	github.com/google/go-jsonnet/cmd/jsonnet
 	github.com/google/go-jsonnet/cmd/jsonnet-lint
+	github.com/google/go-jsonnet/cmd/jsonnetfmt
 	github.com/redpanda-data/protoc-gen-go-mcp/cmd/protoc-gen-go-mcp
 	github.com/sigstore/cosign/v2/cmd/cosign
 )
