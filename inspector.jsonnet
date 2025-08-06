@@ -81,15 +81,11 @@ local deployment = {
             ],
             "ports": [
               {
-                "name": "webui",
-                "containerPort": config.webui.port,
+                "name": variant,
+                "containerPort": config[variant].port,
                 "protocol": "TCP",
-              },
-              {
-                "name": "proxy",
-                "containerPort": config.proxy.port,
-                "protocol": "TCP",
-              },
+              }
+              for variant in std.objectFields(config)
             ],
           },
         ],
@@ -109,17 +105,12 @@ local service = {
     "selector": labels,
     "ports": [
       {
-        "name": "webui",
-        "port": config.webui.port,
-        "targetPort": config.webui.port,
+        "name": variant,
+        "port": config[variant].port,
+        "targetPort": config[variant].port,
         "protocol": "TCP",
-      },
-      {
-        "name": "proxy",
-        "port": config.proxy.port,
-        "targetPort": config.proxy.port,
-        "protocol": "TCP",
-      },
+      }
+      for variant in std.objectFields(config)
     ],
   },
 };
