@@ -1,8 +1,10 @@
 # inspector.validate.jq
 
-# Define some variables
-"inspector" as $NAME |
-"orca-allosaurus.ts.net" as $TAILNET |
+# Expects variables from the invocation:
+# jq \
+# --argjson TLS [true|false]
+# --arg NAME [string]
+# --arg TAILNET [string]
 
 # Each of these is a test
 # Each test is represented by an

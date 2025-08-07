@@ -18,5 +18,7 @@ fi
 
   ./inspector.sh \
   | jq \
-    --argjson "TLS" "${TLS}" \
+    --argjson TLS ${TLS} \
+    --arg NAME ${INSPECTOR_NAME} \
+    --arg TAILNET ${TAILNET} \
     --from-file ./inspector.validate.jq
