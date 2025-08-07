@@ -6,6 +6,9 @@
 # --arg NAME [string]
 # --arg TAILNET [string]
 
+6274 as $WEBUI_PORT |
+6277 as $PROXY_PORT |
+
 # Each of these is a test
 # Each test is represented by an
 # if
@@ -56,7 +59,7 @@ if (
         then
             "https://\($NAME)-webui.\($TAILNET)"
         else
-            "http://\($NAME).\($TAILNET)"
+            "http://\($NAME).\($TAILNET):\($WEBUI_PORT)"
         end
       ) as $VALUE
     | .value==$VALUE

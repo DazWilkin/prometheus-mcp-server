@@ -92,11 +92,14 @@ local deployment = {
                 "value": if TLS then
                   // If TLS (Ingress) then we want to permit:
                   // https://inspector-webui.{tailnet}
-                  fqdn(config.webui.host, tailnet)
+                  fqdn(config.webui.host,tailnet)
                 else
                   // If not TLS (Service) then we want to permit:
-                  // http://inspector.{tailnet}
-                  fqdn(name, tailnet),
+                  // http://inspector.{tailnet}:{port}
+                  "%(host)s:%(port)s" % {
+                    "host": fqdn(name, tailnet),
+                    "port": config.webui.port,
+                  }
               },
               {
                 "name": "MCP_AUTO_OPEN_ENABLED",
