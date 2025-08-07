@@ -238,13 +238,23 @@ Address 1: 10.89.0.8 inspector
 
 ## Kubernetes
 
+Using Ingresses:
+
 ![MCP Inspector: Kubernetes](./mcp.inspector.kubernetes.png)
 
 |Key|Value|
 |---|-----|
 |Transport Type|Streamable HTTP|
 |URL|`http://${NAME}.${NAMESPACE}.svc.cluster.local:${SERVER_PORT}/mcp`|
-|Inspector Proxy Address|`https://inpector-proxy.${TAILNET}`|
+|Inspector Proxy Address|`https://${NAME}-proxy.${TAILNET}`|
+
+Using Service:
+
+|Key|Value|
+|---|-----|
+|Transport Type|Streamable HTTP|
+|URL|`http://${NAME}.${NAMESPACE}.svc.cluster.local:${SERVER_PORT}/mcp`|
+|Inspector Proxy Address|`http://${NAME}.${TAILNET}`|
 
 ```bash
 NAMESPACE="prometheus-mcp-server"
@@ -260,8 +270,8 @@ NAMESPACE="prometheus-mcp-server"
 |----|----|-----|
 |`{NAME}`|Deployment|Publishes `webui` (6274) and `proxy` (6277)|
 |`{NAME}`|Service|Exposes `webui` and `proxy`|
-|`{NAME}-webui`|Ingress|Publishes `webui`|
-|`{NAME}-proxy`|Ingress|Publishes `proxy`|
+|`{NAME}-webui`|Ingress|Optional: Publishes `webui`|
+|`{NAME}-proxy`|Ingress|Optional: Publishes `proxy`|
 |`{NAME}`|VPA||
 
 > **NOTE** `Deployment` constructs reference to the WebUI FQDN (Tailnet) in order to be able tto permit CORS (Allowed Origins)

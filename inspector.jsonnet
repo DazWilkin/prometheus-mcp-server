@@ -1,3 +1,18 @@
+// There are (at least) 2 ways to deploy the Inspector
+// Each requires different configurations:
+// 1. Ingress (TLS=true)
+//  + Publishes HTTPS endpoints `inspector-webui` and `inspector-proxy`
+//  + Requires Deployment ALLOWED_ORIGINS of `https://inspector-webui.{tailnet}`
+//  + Basic Service
+//  + 2x Ingress
+//
+// 2. Service type: LoadBalancer (TLS=false)
+//  + Publishes HTTP endpoint `http://inspector.{tailnet}` with WebUI|Proxy ports
+//  + Requires Deployment ALLOWED_ORIGINS of `http://inspector.{tailnet}`
+//  + Augment Service w/ Tailscale annotations and LoadBalancer class
+//  + No Ingress
+local TLS = if std.extVar("TLS")=="T" then true else false;
+
 local name = std.extVar("NAME");
 local token = std.extVar("TOKEN");
 local tailnet = std.extVar("TAILNET");
@@ -12,7 +27,9 @@ local labels = {
 local image = "ghcr.io/modelcontextprotocol/inspector:0.16.2";
 
 // Converts a host name into a fully-qualified Tailnet (Ingress) URL
-local fqdn(host, tailnet) = "https://%(host)s.%(tailnet)s" % {
+local fqdn(host, tailnet) = "%(scheme)s://%(host)s.%(tailnet)s" % {
+  // Depends upon the TLS setting (Ingress or Service deployment)
+  "scheme": if TLS then "https" else "http",
   "host": host,
   "tailnet": tailnet,
 };
@@ -33,10 +50,13 @@ local base_config = {
 local config = {
   // Use the base configuration
   // And extend it with the host name
-  [key]: base_config[key] {
-    "host": "%(name)s-%(key)s" % { "name": name, "key": key },
+  [variant]: base_config[variant] {
+    "host": "%(name)s-%(variant)s" % {
+      "name": name,
+      "variant": variant,
+    },
   }
-  for key in std.objectFields(base_config)
+  for variant in std.objectFields(base_config)
 };
 
 local deployment = {
@@ -68,7 +88,15 @@ local deployment = {
               },
               {
                 "name": "ALLOWED_ORIGINS",
-                "value": fqdn(config.webui.host, tailnet),
+                // Depends upon the TLS setting (Ingress or Service deployment)
+                "value": if TLS then
+                  // If TLS (Ingress) then we want to permit:
+                  // https://inspector-webui.{tailnet}
+                  fqdn(config.webui.host, tailnet)
+                else
+                  // If not TLS (Service) then we want to permit:
+                  // http://inspector.{tailnet}
+                  fqdn(name, tailnet),
               },
               {
                 "name": "MCP_AUTO_OPEN_ENABLED",
@@ -94,6 +122,8 @@ local deployment = {
   },
 };
 
+// Depends upon the TLS setting (Ingress or Service deployment)
+// If TLS (Ingress) then create a Service with its base configuration
 local service = {
   "apiVersion": "v1",
   "kind": "Service",
@@ -113,7 +143,25 @@ local service = {
       for variant in std.objectFields(config)
     ],
   },
-};
+} + (
+  // If not TLS (Service) then add Tailscale hostname annotation and LoadBalancer class
+  if !TLS then {
+    // Uses metadata+: to MERGE into the existing service metadata
+    "metadata"+: {
+      "annotations": {
+        // Overrride the default Tailscale hostname
+        // https://tailscale.com/kb/1445/kubernetes-operator-customization#using-custom-machine-names
+        "tailscale.com/hostname": name,
+      },
+    },
+    // Uses spec+: to MERGE into the existing service spec
+    "spec"+: {
+      "type": "LoadBalancer",
+      "loadBalancerClass": "tailscale",
+    },
+  } else {
+  }
+);
 
 // Generate an Ingress for each service port
 // Trying to create one Ingress with different paths didn't work
@@ -167,6 +215,13 @@ local vpa = {
   },
 };
 
+local items = [
+    deployment,
+    service,
+    vpa,
+  ]
+  + if TLS then ingresses else [];
+
 // Output
 {
   "apiVersion": "v1",
@@ -175,9 +230,5 @@ local vpa = {
     "name": name,
     "labels": labels,
   },
-  "items": [
-    deployment,
-    service,
-    vpa,
-  ] + ingresses,
+  "items": items,
 }
