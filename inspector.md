@@ -137,21 +137,31 @@ ${IMAGE} \
 Uses network `mcp`, publishes DNS `inspector` and requires `ALLOWED_ORIGINS=http://0.0.0.0:6274`:
 
 ```bash
+source .env.test
+
 VERS="0.16.2"
 
-TOKEN=$(openssl rand -hex 32) && echo ${TOKEN}
+# Local
+ALLOWED_ORIGINS="http://localhost:6274"
+
+# Kubernetes
+# Ingress
+# ALLOWED_ORIGINS="https://inspector-webui.${TAILNET}"
+
+# Service
+# ALLOWED_ORIGINS="http://inspector.${TAILNET}:6274"
 
 podman run \
 --interactive --tty --rm \
---name=inspector \
+--name=${INSPECTOR_NAME} \
 --network=mcp \
---env=HOST=inspector \
---env=ALLOWED_ORIGINS=http://0.0.0.0:6274,http://localhost:6274 \
+--env=HOST=0.0.0.0 \
+--env=ALLOWED_ORIGINS=${ALLOWED_ORIGINS} \
 --env=MCP_AUTO_OPEN_ENABLED=false \
---env=MCP_PROXY_AUTH_TOKEN=${TOKEN} \
+--env=MCP_PROXY_AUTH_TOKEN=${PROXY_TOKEN} \
 --publish=6274:6274/tcp \
 --publish=6277:6277/tcp \
-ghcr.io/modelcontextprotocol/inspector:${VERS} \
+ghcr.io/modelcontextprotocol/inspector:${VERS}
 ```
 This doesn't appear to work; it's not possible to set `http-streamable` in config (see [#622](https://github.com/DazWilkin/prometheus-mcp-server/issues/622))
 ```bash
