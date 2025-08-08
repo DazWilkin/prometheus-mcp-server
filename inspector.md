@@ -238,9 +238,11 @@ Address 1: 10.89.0.8 inspector
 
 ## Kubernetes
 
+The [Proxy Session Token](#proxy-session-token) is required by the MCP Inspector UI. It is logged in the output the Inspector when it starts and is configured in the `Deployment`'s env vars `MCP_PROXY_AUTH_TOKEN`
+
 Using Ingresses:
 
-![MCP Inspector: Kubernetes](./mcp.inspector.kubernetes.png)
+![MCP Inspector: Kubernetes](./mcp.inspector.kubernetes.ingress.png)
 
 |Key|Value|
 |---|-----|
@@ -249,6 +251,8 @@ Using Ingresses:
 |Inspector Proxy Address|`https://${NAME}-proxy.${TAILNET}`|
 
 Using Service:
+
+![MCP Inspector: Kubernetes](./mcp.inspector.kubernetes.service.png)
 
 |Key|Value|
 |---|-----|
@@ -259,6 +263,10 @@ Using Service:
 ```bash
 NAMESPACE="prometheus-mcp-server"
 
+# Validator
+./inspector.validate.sh
+
+# Deployer
 ./inspector.sh \
 | jq -r . \
 | kubectl apply \
@@ -276,6 +284,10 @@ NAMESPACE="prometheus-mcp-server"
 
 > **NOTE** `Deployment` constructs reference to the WebUI FQDN (Tailnet) in order to be able tto permit CORS (Allowed Origins)
 
+### `ALLOWED_ORIGINS`
+
+```bash
+
 Confirm the CORS (Allowed Origins) value(s):
 
 ```bash
@@ -291,6 +303,9 @@ Confirm the CORS (Allowed Origins) value(s):
   --namespace=${NAMESPACE} \
   --output=jsonpath="${FILTER}{'\n'}"
 )
+```
+
+### Proxy Session Token
 
 Obtain the Proxy Session Token to be pasted into the Inspector Web UI:
 

@@ -6,6 +6,7 @@
 # --arg NAME [string]
 # --arg TAILNET [string]
 
+# These are piped into the filter
 6274 as $WEBUI_PORT |
 6277 as $PROXY_PORT |
 
@@ -114,3 +115,6 @@ if (
 then .
 else error("Ingress check")
 end
+
+# Pipe the results into valid (true) or invalid (false)
+| if . == true then "valid" else "invalid" end

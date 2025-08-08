@@ -16,9 +16,9 @@ else
   TLS="false"
 fi
 
-  ./inspector.sh \
-  | jq \
-    --argjson TLS ${TLS} \
-    --arg NAME ${INSPECTOR_NAME} \
-    --arg TAILNET ${TAILNET} \
-    --from-file ./inspector.validate.jq
+./inspector.sh \
+| jq -r \
+  --argjson TLS ${TLS} \
+  --arg NAME ${INSPECTOR_NAME} \
+  --arg TAILNET ${TAILNET} \
+  --from-file ./inspector.validate.jq
